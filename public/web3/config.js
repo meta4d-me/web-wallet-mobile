@@ -4,7 +4,7 @@ const buyAddress = process.env.buyAddress;
 const usdtAddress = process.env.usdtAddress;
 const busdAddress = process.env.busdAddress;
 const transactionHashAddress = process.env.transactionHashAddress;
-const ChainId = process.env.ChainId;
+const ChainId = process.env.targetChainId;
 //
 const providerOptions = {
   walletconnect: {

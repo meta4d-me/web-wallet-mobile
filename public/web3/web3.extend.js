@@ -1,7 +1,7 @@
 import Web3Modal from 'web3modal';
 import Web3 from 'web3';
-import { providerOptions, networkParams } from './config';
-import $$ from '@gwApp/$$'; // 自定义类
+import { providerOptions, networkParams } from '@/web3/config';
+import $$ from '@App/$$'
 export default {
   web3: null,
   provider: null,
@@ -16,7 +16,7 @@ export default {
     });
   },
   async init(type, userWalletAddress, callback){
-    //console.log(process.env.ChainId)
+    //console.log(process.env.targetChainId)
     try {
       this.provider = await this.web3Modal().connect()
     } catch(connectError){
@@ -46,7 +46,7 @@ export default {
     }
     console.log('3');
     await this.checkNetwork({
-      targetChain: process.env.ChainId,
+      targetChain: process.env.targetChainId,
       callback: callback,
       userWalletAddress,
       type,
