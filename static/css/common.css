@@ -74,3 +74,23 @@ article,aside,figcaption,figure,footer,header,hgroup,main,nav,section{display:bl
   from { opacity:0; }
   to { opacity:1; }
 }
+
+/**更改unity web3弹窗**/
+.unity #walletconnect-wrapper { background: rgba(37, 41, 46, 0.95); }
+.unity #walletconnect-qrcode-modal { padding: 0; background: none; position: relative; top: auto; width: auto; left: auto; height: auto; transition: none; will-change: auto; }
+.unity .walletconnect-modal__base { will-change: auto; transform:none; }
+
+
+@media (max-height:420px) {
+  .unity #walletconnect-qrcode-modal { width:300px; }
+  .unity .walletconnect-modal__base { padding:10px; max-width:300px; }
+  .unity .walletconnect-modal__mobile__toggle { margin-bottom:10px; }
+  .unity .walletconnect-modal__header { position:relative; left:auto; top:auto; display:flex; -webkit-box-pack:center; justify-content:center; align-items:center;  }
+  .unity .walletconnect-modal__header p { color:#222; display: contents; flex: auto; }
+  .unity .walletconnect-modal__header .walletconnect-modal__headerLogo { margin:0 5px 0 0; }
+  .unity .walletconnect-modal__header .walletconnect-modal__close__wrapper { position: fixed; top: 5px; right: 5px; }
+  .unity .walletconnect-connect__buttons__wrapper__android { margin: 110px 0; }
+  .unity #walletconnect-qrcode-text { font-size:14px; margin: 0 0 10px; }
+  .unity .walletconnect-qrcode__image { width: 200px;  }
+  .unity .walletconnect-modal__footer { margin:5px 0 0; }
+}

@@ -139,5 +139,3 @@ var bridge = {
     }
   })
 }();
-
-export default

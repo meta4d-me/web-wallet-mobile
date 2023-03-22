@@ -1,24 +1,16 @@
-# h5-web3-wallet-V1
+# h5-web3-wallet-vue3-vite-ts-v1
 
-## 基于VUE3.0+webpack5最新版+vant4.0
+基于 Vue3 + vite4 + ts 的h5-web3-wallet应用
 
-### 依赖包如下：
-    "axios": "^1.1.3",
-    "@walletconnect/web3-provider": "^1.8.0",
-    "web3": "^1.8.0",
-    "web3modal": "^1.9.9",
-    "jsrsasign": "^10.5.27",
-    "vant": "^4.0.11",
-    "vue": "^3.2.47",
-    "vue-router": "^4.1.6",
-    "mitt": "^3.0.0"
+## 安装步骤
+> 因为使用vite4，node版本需要 16.14+
 
-### 启动命令
-    npm run dev
+```
+npm install         // 安装项目依赖，等待安装完成之后，安装失败可用 cnpm 或 yarn
 
-### 打包命令
-    npm run build-test
-    npm run build-uat
-    npm run build-prod
+// 运行
+npm run dev
 
-
+// 执行构建命令，生成的dist文件夹放在服务器下即可访问
+npm run build
+```
