@@ -79,6 +79,7 @@ article,aside,figcaption,figure,footer,header,hgroup,main,nav,section{display:bl
 .unity #walletconnect-wrapper { background: rgba(37, 41, 46, 0.95); }
 .unity #walletconnect-qrcode-modal { padding: 0; background: none; position: relative; top: auto; width: auto; left: auto; height: auto; transition: none; will-change: auto; }
 .unity .walletconnect-modal__base { will-change: auto; transform:none; }
+.unity .walletconnect-search__input { width:calc(100% - 32px) !important; }
 
 
 @media (max-height:420px) {

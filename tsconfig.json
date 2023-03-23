@@ -13,14 +13,14 @@
     "lib": ["ESNext", "DOM"],
     "skipLibCheck": true,
     "paths": {
-      "@utils/": ["./src/utils/*"],//格式一定要写对符号*不能少不然找不到@或者没有代码提示
-      "@web3/": ["./src/web3/*"],
-      "@$$/": ["./src/$$/*"],
-      "@views/": ["./src/views/*"],
+      "@/": ["./public/*"],//格式一定要写对符号*不能少不然找不到@或者没有代码提示
+      "@utils/": ["./public/utils/*"],
+      "@web3/": ["./public/web3/*"],
+      "@App/": ["./demoApp/*"],
       "@m4m/": ["./m4m/*"]
     },
     "allowJs": true
   },
-  "include": ["src/**/*.ts", "src/**/*.d.ts","src/**/*.vue"],
+  "include": ["m4m/*.ts","m4m/**/*.ts", "m4m/**/*.d.ts","public/**/*.vue"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
