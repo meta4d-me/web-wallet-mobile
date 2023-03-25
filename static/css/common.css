@@ -64,6 +64,7 @@ input:disabled,input[disabled],textarea:disabled,textarea[disabled] { background
 .XScroll { overflow:hidden; overflow-x:auto; -webkit-overflow-scrolling:touch; overflow-scrolling:touch; }
 article,aside,figcaption,figure,footer,header,hgroup,main,nav,section{display:block}
 .van-image .van-image__loading { background:#000; z-index: -1; }
+.van-toast--unclickable { /**width:300px;**/ }
 /**通用lazyLoad**/
 .success { -webkit-animation:fadeIn 01s ease 0.2s 1 both; animation:fadeIn 1s ease 0.2s 1 both; -moz-animation:fadeIn 1s ease 0.2s 1 both; -o-animation:fadeIn 1s ease 0.2s 1 both; -ms-animation:fadeIn 1s ease 0.2s 1 both; }
 @-webkit-keyframes fadeIn {
@@ -81,17 +82,14 @@ article,aside,figcaption,figure,footer,header,hgroup,main,nav,section{display:bl
 .unity .walletconnect-modal__base { will-change: auto; transform:none; }
 .unity .walletconnect-search__input { width:calc(100% - 32px) !important; }
 
-
-@media (max-height:420px) {
-  .unity #walletconnect-qrcode-modal { width:300px; }
-  .unity .walletconnect-modal__base { padding:10px; max-width:300px; }
-  .unity .walletconnect-modal__mobile__toggle { margin-bottom:10px; }
-  .unity .walletconnect-modal__header { position:relative; left:auto; top:auto; display:flex; -webkit-box-pack:center; justify-content:center; align-items:center;  }
-  .unity .walletconnect-modal__header p { color:#222; display: contents; flex: auto; }
-  .unity .walletconnect-modal__header .walletconnect-modal__headerLogo { margin:0 5px 0 0; }
-  .unity .walletconnect-modal__header .walletconnect-modal__close__wrapper { position: fixed; top: 5px; right: 5px; }
-  .unity .walletconnect-connect__buttons__wrapper__android { margin: 110px 0; }
-  .unity #walletconnect-qrcode-text { font-size:14px; margin: 0 0 10px; }
-  .unity .walletconnect-qrcode__image { width: 200px;  }
-  .unity .walletconnect-modal__footer { margin:5px 0 0; }
-}
+.mobile .unity. #walletconnect-qrcode-modal { width:300px; }
+.mobile .unity .walletconnect-modal__base { padding:10px; max-width:300px; }
+.mobile .unity .walletconnect-modal__mobile__toggle { margin-bottom:10px; }
+.mobile .unity .walletconnect-modal__header { position:relative; left:auto; top:auto; display:flex; -webkit-box-pack:center; justify-content:center; align-items:center;  }
+.mobile .unity .walletconnect-modal__header p { color:#222; display: contents; flex: auto; }
+.mobile .unity .walletconnect-modal__header .walletconnect-modal__headerLogo { margin:0 5px 0 0; }
+.mobile .unity .walletconnect-modal__header .walletconnect-modal__close__wrapper { position: fixed; top: 5px; right: 5px; }
+.mobile .unity .walletconnect-connect__buttons__wrapper__android { margin: 110px 0; }
+.mobile .unity #walletconnect-qrcode-text { font-size:14px; margin: 0 0 10px; }
+.mobile .unity .walletconnect-qrcode__image { width: 200px;  }
+.mobile .unity .walletconnect-modal__footer { margin:5px 0 0; }

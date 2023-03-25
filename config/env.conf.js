@@ -9,7 +9,7 @@ class MultiModule {
   constructor (name, opts) {
     Object.assign(this, {
       name,
-      port: 9000,
+      port: 8000,
       host: '0.0.0.0',
       filename: '',
       title: '',
@@ -29,6 +29,7 @@ class MultiModule {
         nftContract: '0xb6bb4812a8e075cbad0128e318203553c4ca463d',
         targetContract: '0xdd5b1C4685A34Ff07A21Ca2507D4b80e60EbC85f',
         targetChain: 80001,
+        analyzer: true,
         dist: 'test',
       },
       uat: {
@@ -38,6 +39,7 @@ class MultiModule {
         nftContract: '0xb6bb4812a8e075cbad0128e318203553c4ca463d',
         targetContract: '0xdd5b1C4685A34Ff07A21Ca2507D4b80e60EbC85f',
         targetChain: 80001,
+        analyzer: true,
         dist: 'uat',
       },
       prod: {
@@ -47,6 +49,7 @@ class MultiModule {
         nftContract: '0xb6bb4812a8e075cbad0128e318203553c4ca463d',
         targetContract: '0xdd5b1C4685A34Ff07A21Ca2507D4b80e60EbC85f',
         targetChain: 80001,
+        analyzer: true,
         dist: 'prod',
       },
     }, opts)

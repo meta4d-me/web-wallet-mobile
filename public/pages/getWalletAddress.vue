@@ -21,7 +21,7 @@
 import $web3Ext from '@web3/web3.extend';
 import { showFailToast } from 'vant';
 export default {
-  name: 'getWalletAddress',
+  name: 'GetWalletAddress',
   data() {
     return {
       chainStore: {
@@ -39,7 +39,7 @@ export default {
     this.chainStore.urlSign = this.$route.query.sign || '111111';
   },
   mounted(){
-
+    this.$root.loading(false);
   },
   methods: {
     handle(){
@@ -64,6 +64,7 @@ export default {
     },
     getSignature(){
       $web3Ext.getSignature(this.chainStore.urlSign, this.chainStore.userAddress).then(r => {
+        console.log('getSignature success:', r);
         this.chainStore.walletSignature = r;
       });
     },

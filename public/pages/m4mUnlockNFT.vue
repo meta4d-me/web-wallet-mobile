@@ -8,7 +8,7 @@
         unity传入参数：{{ mint }}
       </p>
       <van-button plain type="primary" @click="getWalletAddress()">
-        开始mint
+        开始unlock
       </van-button>
       <br>
       <van-button plain type="danger" @click="handle">
@@ -19,11 +19,11 @@
 </template>
 
 <script>
-import { isApprovalForAll, setApprovalForAll, handleGameEnd, handleLockComponents,getGameSignerHash, getLocalGameSignerSig } from '@web3/mint';
+import { handleUnlockComponents } from '@web3/mint';
 import $web3Ext from '@web3/web3.extend';
 import { showFailToast, showSuccessToast } from 'vant';
 export default {
-  name: 'M4mMint',
+  name: 'M4mUnlockNFT',
   data() {
     return {
       mint: {
@@ -39,7 +39,7 @@ export default {
         nftContract: this.$$.apiURLS.nftContract,
         targetContract: this.$$.apiURLS.targetContract,
         ERCType: this.$$.apiURLS.ERCType,
-        txId: '', // mint成功以后的哈希地址
+        txId: '',
       },
       chainStore: {
         chainId: null,
@@ -74,39 +74,16 @@ export default {
       this.mint.gameSignerSig = query.gameSign;
       this.mint.operatorSig = Buffer.from('');
       this.mint.guid = query.guid;
-      console.log('this.mint', this.mint);
-      this.handleGetGameSignerHash();
-    },
-    handleGetGameSignerHash(){
-      getGameSignerHash(
-        this.mint.params,
-        this.mint.m4mTokenId,
-        this.mint.gameId,
-        this.mint.nonce,
-      ).then(res => {
-        this.handleGetLocalGameSignerSig(res);
-      });
-    },
-    handleGetLocalGameSignerSig(hash){
-      getLocalGameSignerSig(
-        hash,
-        '9c242f13f94872bda353270957f72bb7a1e4c71e3e9b5d174ad0684ffe6b62f0',
-      ).then(res => {
-        if(res !== this.mint.gameSignerSig){
-          showFailToast('Signature May Be Incorrect !');
-        }else{
-          showSuccessToast('Signature Verification Passed !');
-        }
-      });
+      console.log(this.mint);
     },
     getWalletAddress(){
       console.log('getWalletAddress start');
       $web3Ext.init('connectWallet', null, async (res) => {
-        console.log('connectWallet result', res);
+        console.log(res)
         if(res.err === 0){
           this.chainStore = Object.assign(this.chainStore, res.data);
           this.mint.owner = this.chainStore.userAddress;
-          this.handleIsApprovalForAll();
+          this.handleUnlockNFT();
         } else {
           if(res.data){
             showFailToast(res.data);
@@ -116,94 +93,42 @@ export default {
         }
       });
     },
-    handleIsApprovalForAll(){
-      /**mint流程
-       * 先判断用户是否已经Approve签约授权
-       * 然后执行mint
-       **/
-      console.log('handleIsApprovalForAll start');
-      isApprovalForAll(
-        this.chainStore.provider,
-        this.mint.ERCType,
-        this.mint.owner,
-        this.mint.nftContract,
-        this.mint.targetContract,
-      ).then(res => {
-        console.log('handleIsApprovalForAll general result', res)
-        if(res && typeof res === 'boolean' && JSON.stringify(res) === 'true'){
-          this.handleLockRole();
-        }else{
-          this.handleSetApprovalForAll();
+    handleUnlockNFT(){
+      console.log('handleUnlockNFT start');
+      let outComponentIds = [];
+      if(this.mint.params){
+        let item;
+        for(let i=0;i<this.mint.params.length;i++){
+          item = this.mint.params[i];
+          outComponentIds.push(item.tokenId);
         }
-      }).catch(res => {
-        console.log('handleIsApprovalForAll catch error', res);
-      });
-    },
-    handleSetApprovalForAll(){
-      console.log('handleSetApprovalForAll start');
-      setApprovalForAll(
-        this.chainStore.provider,
-        this.mint.ERCType,
-        this.mint.owner,
-        this.mint.nftContract,
-        this.mint.targetContract,
-      ).then(res => {
-        console.log('handleSetApprovalForAll general result', res)
-        if(res && res.transactionHash){
-          this.handleLockRole();
-        }else{
-          showFailToast('User Approval Failed !');
-        }
-      }).catch(res => {
-        console.log('handleSetApprovalForAll catch error', res);
-      });
-    },
-    handleLockRole(){
-      console.log('handleLockRole start');
-      handleLockComponents(
-        this.chainStore.provider,
-        this.mint.targetContract,
-        this.mint.m4mTokenId.toString(),
-        this.mint.gameId,
-        [],
-        [],
-      ).then(res => {
-        console.log('handleLockRole general result', res);
-        if(res){
-          this.handleMintResult();
-        }else{
-          showFailToast('Lock Role Failed !');
-        }
-      }).catch(res => {
-        console.log('handleLockRole catch error', res);
-      });
-    },
-    handleMintResult(){
-      console.log('handleMintResult start');
-      handleGameEnd(
+        console.log('handleUnlockNFT for components !');
+      }else{
+        console.log('handleUnlockNFT for role !');
+      }
+      handleUnlockComponents(
         this.chainStore.provider,
         this.mint.targetContract,
         this.mint.m4mTokenId.toString(),
         this.mint.nonce,
-        this.mint.params,
+        outComponentIds,
         this.mint.operatorSig,
         this.mint.gameSignerSig,
       ).then(res => {
-        console.log('handleMintResult general result', res);
+        console.log('handleUnlockNFT general result', res);
         if(res){
-          showSuccessToast('Mint NFT Success !');
+          showSuccessToast('Unlock NFT Success !');
           this.mint.txId = res.transactionHash;
-          this.handle();
         }else{
-          showFailToast('Mint NFT Failed !');
+          showFailToast('Unlock NFT Failed !');
         }
       }).catch(res => {
-        console.log('handleMintResult catch error', res);
+        console.log('handleUnlockNFT catch error', res);
       });
     },
     handle(){
       let obj = { guid: this.mint.guid, txId: this.mint.txId, t: new Date().valueOf() }
-      window.location.href = 'uniwebview://mint'+this.$$.Obj2String(obj);
+      window.location.href = 'uniwebview://unlock'+this.$$.Obj2String(obj);
     },
   },
 };

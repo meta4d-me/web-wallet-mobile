@@ -10,7 +10,17 @@
       <van-button plain type="primary" @click="handleAction('/mint')">
         Mint流程
       </van-button>
+      <van-button plain type="primary" @click="handleAction('/lock')">
+        lock流程
+      </van-button>
+      <van-button plain type="primary" @click="handleAction('/lockRole')">
+        lockRole流程
+      </van-button>
+      <van-button plain type="primary" @click="handleAction('/unlock')">
+        unlock流程
+      </van-button>
     </ul>
+    <!--
     <h2 class="black">
       unity webview相关方法和demo
     </h2>
@@ -19,7 +29,7 @@
         获取unity传入参数
       </van-button>
     </ul>
-
+-->
   </nav>
 
   <router-view v-slot="{ Component }">
@@ -44,6 +54,7 @@ export default {
   },
   mounted(){
     this.$$.$('html').classList.add(this.$$.ENV.env);
+    this.$root.loading(false);
   },
   methods: {
     handleAction(url){

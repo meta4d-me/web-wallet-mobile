@@ -14,6 +14,13 @@ export default {
       event: false,
     };
   },
+  watch: {
+    $route(to, from){
+      //console.log(1)
+      //console.log(to, from);
+      this.loading(true);
+    },
+  },
   created(){
 
   },

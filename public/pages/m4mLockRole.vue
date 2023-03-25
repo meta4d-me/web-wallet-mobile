@@ -8,7 +8,7 @@
         unity传入参数：{{ mint }}
       </p>
       <van-button plain type="primary" @click="getWalletAddress()">
-        开始mint
+        开始lock
       </van-button>
       <br>
       <van-button plain type="danger" @click="handle">
@@ -19,11 +19,11 @@
 </template>
 
 <script>
-import { isApprovalForAll, setApprovalForAll, handleGameEnd, handleLockComponents,getGameSignerHash, getLocalGameSignerSig } from '@web3/mint';
+import { handleLockComponents, isApprovalForAll, setApprovalForAll } from '@web3/mint';
 import $web3Ext from '@web3/web3.extend';
 import { showFailToast, showSuccessToast } from 'vant';
 export default {
-  name: 'M4mMint',
+  name: 'M4mUnlockNFT',
   data() {
     return {
       mint: {
@@ -39,7 +39,7 @@ export default {
         nftContract: this.$$.apiURLS.nftContract,
         targetContract: this.$$.apiURLS.targetContract,
         ERCType: this.$$.apiURLS.ERCType,
-        txId: '', // mint成功以后的哈希地址
+        txId: '',
       },
       chainStore: {
         chainId: null,
@@ -56,48 +56,21 @@ export default {
   },
   mounted(){
     this.$root.loading(false);
+    this.getParams();
   },
   methods: {
     getParams(){
       let query = {};
       query = this.$route.query;
       if(JSON.stringify(query) === '{}'){
-        let url = 'https://aradpay.gamewonderlab.io/#/mint?gameSign=0x5fc60e3b729078c839b632170a7a7a95a79ef5e6923b39f5cbb396b72c540c1a04dc4438358d7e1aba2812216a79a5c5f30bc23d423b1c84d4161c5aa82d9bd21b&guid=401963858928873894&nonce=1&params=%7b%22nonce%22%3a%201%2c%20%22params%22%3a%20%5b%7b%22name%22%3a%20%22fashionName%22%2c%20%22amount%22%3a%201%2c%20%22symbol%22%3a%20%22fashionName%22%2c%20%22prepare%22%3a%20true%2c%20%22tokenId%22%3a%20%22401963858928872084%22%7d%5d%2c%20%22m4m_token_id%22%3a%20%22399712059115176343%22%7d&tokenId=399712059115176343';
+        let url = 'https://aradpay.gamewonderlab.io/#/mint?m4mTokenId=399712059115176343';
         query = this.$$.getURLParam({}, url);
       }
       /**gameSign, guid, nonce, params, tokenId**/
       console.log('url query 参数', query);
       this.mint.m4mTokenId = query.tokenId || query.m4mTokenId;
-      this.mint.params = query.params && JSON.parse(query.params) || '';
-      this.mint.nonce = this.mint.params && Number(this.mint.params.nonce) || '';
-      this.mint.params = this.mint.params && this.mint.params.params || '';
-      this.mint.gameSignerSig = query.gameSign;
-      this.mint.operatorSig = Buffer.from('');
-      this.mint.guid = query.guid;
       console.log('this.mint', this.mint);
-      this.handleGetGameSignerHash();
-    },
-    handleGetGameSignerHash(){
-      getGameSignerHash(
-        this.mint.params,
-        this.mint.m4mTokenId,
-        this.mint.gameId,
-        this.mint.nonce,
-      ).then(res => {
-        this.handleGetLocalGameSignerSig(res);
-      });
-    },
-    handleGetLocalGameSignerSig(hash){
-      getLocalGameSignerSig(
-        hash,
-        '9c242f13f94872bda353270957f72bb7a1e4c71e3e9b5d174ad0684ffe6b62f0',
-      ).then(res => {
-        if(res !== this.mint.gameSignerSig){
-          showFailToast('Signature May Be Incorrect !');
-        }else{
-          showSuccessToast('Signature Verification Passed !');
-        }
-      });
+      this.getWalletAddress();
     },
     getWalletAddress(){
       console.log('getWalletAddress start');
@@ -111,16 +84,12 @@ export default {
           if(res.data){
             showFailToast(res.data);
           } else {
-            showFailToast('Unknown Error !');
+            showFailToast('connectWallet Error !');
           }
         }
       });
     },
     handleIsApprovalForAll(){
-      /**mint流程
-       * 先判断用户是否已经Approve签约授权
-       * 然后执行mint
-       **/
       console.log('handleIsApprovalForAll start');
       isApprovalForAll(
         this.chainStore.provider,
@@ -170,7 +139,8 @@ export default {
       ).then(res => {
         console.log('handleLockRole general result', res);
         if(res){
-          this.handleMintResult();
+          showSuccessToast('Lock Role Success !');
+          this.handle();
         }else{
           showFailToast('Lock Role Failed !');
         }
@@ -178,32 +148,9 @@ export default {
         console.log('handleLockRole catch error', res);
       });
     },
-    handleMintResult(){
-      console.log('handleMintResult start');
-      handleGameEnd(
-        this.chainStore.provider,
-        this.mint.targetContract,
-        this.mint.m4mTokenId.toString(),
-        this.mint.nonce,
-        this.mint.params,
-        this.mint.operatorSig,
-        this.mint.gameSignerSig,
-      ).then(res => {
-        console.log('handleMintResult general result', res);
-        if(res){
-          showSuccessToast('Mint NFT Success !');
-          this.mint.txId = res.transactionHash;
-          this.handle();
-        }else{
-          showFailToast('Mint NFT Failed !');
-        }
-      }).catch(res => {
-        console.log('handleMintResult catch error', res);
-      });
-    },
     handle(){
-      let obj = { guid: this.mint.guid, txId: this.mint.txId, t: new Date().valueOf() }
-      window.location.href = 'uniwebview://mint'+this.$$.Obj2String(obj);
+      let obj = { success: 1, t: new Date().valueOf() }
+      window.location.href = 'uniwebview://lockRole'+this.$$.Obj2String(obj);
     },
   },
 };

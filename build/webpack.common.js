@@ -17,7 +17,7 @@ module.exports = () => {
     externals: {
       'axios': 'axios',
       //'web3': 'web3',
-      'ethers': 'ethers',
+      //'ethers': 'ethers',
     },
     output: {
       filename: 'assets/js/[name].[chunkhash].js',

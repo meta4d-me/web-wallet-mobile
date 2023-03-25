@@ -6,9 +6,10 @@ const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 const path = require('path');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
-const envConfig = require('../config/env.conf');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+//const ManifestPlugin = require('webpack-manifest-plugin');
+const envConfig = require('../config/env.conf');
 const BuildENV = envConfig.getBuildENV({ NODE_ENV: '"production"', prod: '"uat"' });
 
 module.exports = (RESETENV) => {
@@ -121,6 +122,7 @@ module.exports = (RESETENV) => {
             warnings: false,
             comparisons: false,
             inline: 2,
+            'drop_debugger': true,
           },
           mangle: {
             safari10: true, // 传递true以解决 Safari 10 循环迭代器错误 “不能两次声明 let 变量”
@@ -163,9 +165,9 @@ module.exports = (RESETENV) => {
     },
   };
 
-  if (RESETENV && RESETENV.analyzer) {
-    pro__base_config.plugins.push(new BundleAnalyzerPlugin()); //打包体积分析
-    pro__base_config.plugins.push(new ManifestPlugin());  //展示源代码和打包代码映射关系
+  if (BuildENV && BuildENV.analyzer) {
+    BuildConfig.plugins.push(new BundleAnalyzerPlugin()); //打包体积分析
+    //BuildConfig.plugins.push(new ManifestPlugin());  //展示源代码和打包代码映射关系
   }
 
   return merge(common(RESETENV), BuildConfig); //合并配置
