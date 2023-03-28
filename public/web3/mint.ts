@@ -107,10 +107,13 @@ export const handleLockComponents = async(provider, targetContract, m4mTokenId, 
     console.log('handleLockComponents baggage', baggage);
     let info = await baggage.lockedEmptyNFTs(m4mTokenId);
     console.log('handleLockComponents info', info);
-    if(Number(info.owner)){
+    console.log('handleLockComponents info gameId',Number(info.gameId));
+    if(!!Number(info.gameId)){
         return {success:true};
     }else{
+        console.log('handleLockComponents tx step');
         let tx = await baggage.lockComponents(m4mTokenId, gameId, inComponentIds, inAmounts);
+        console.log('handleLockComponents tx', tx);
         return await tx.wait();
     }
 }

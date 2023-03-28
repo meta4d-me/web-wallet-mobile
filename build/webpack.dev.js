@@ -19,12 +19,12 @@ module.exports = (RESETENV) => {
       host: BuildENV.host,
       port: BuildENV.port && Number(BuildENV.port),
       proxy: {
-        '/aaa': {
-          target: 'http://192.168.50.104:8085',
-          //target: 'https://baidu.com',
+        '/api': {
+          target: 'http://localhost:3927',
+          //target: 'http://localhost:3927',
           //secure: false, // 如果是https接口，需要配置这个参数
           changeOrigin: true,
-          pathRewrite: { '^/aaa': '/aaa' },
+          pathRewrite: { '^/api': '/api' },
         },
       },
     },

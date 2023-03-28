@@ -65,6 +65,7 @@ input:disabled,input[disabled],textarea:disabled,textarea[disabled] { background
 article,aside,figcaption,figure,footer,header,hgroup,main,nav,section{display:block}
 .van-image .van-image__loading { background:#000; z-index: -1; }
 .van-toast--unclickable { /**width:300px;**/ }
+.van-button { max-width: 100%; word-break: break-all; }
 /**通用lazyLoad**/
 .success { -webkit-animation:fadeIn 01s ease 0.2s 1 both; animation:fadeIn 1s ease 0.2s 1 both; -moz-animation:fadeIn 1s ease 0.2s 1 both; -o-animation:fadeIn 1s ease 0.2s 1 both; -ms-animation:fadeIn 1s ease 0.2s 1 both; }
 @-webkit-keyframes fadeIn {
@@ -77,6 +78,7 @@ article,aside,figcaption,figure,footer,header,hgroup,main,nav,section{display:bl
 }
 
 /**更改unity web3弹窗**/
+.uYscM.web3modal-modal-lightbox { z-index: 999; }
 .unity #walletconnect-wrapper { background: rgba(37, 41, 46, 0.95); }
 .unity #walletconnect-qrcode-modal { padding: 0; background: none; position: relative; top: auto; width: auto; left: auto; height: auto; transition: none; will-change: auto; }
 .unity .walletconnect-modal__base { will-change: auto; transform:none; }

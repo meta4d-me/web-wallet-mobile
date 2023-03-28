@@ -1,29 +1,32 @@
 <template>
   <div class="m4mMint">
     <van-button plain type="success" @click="getParams">
-      点击这里，开始获取unity传入参数
+      start for get game params
     </van-button>
     <template v-if="mint && mint.m4mTokenId">
       <p style="margin:20px 0; border:1px solid #f00; padding:15px;word-break: break-all;">
-        unity传入参数：{{ mint }}
+        game params: {{ mint }}
       </p>
       <van-button plain type="primary" @click="getWalletAddress()">
-        开始lock
+        start lock nft
       </van-button>
       <br>
       <van-button plain type="danger" @click="handle">
-        点击回传参数给unity
+        callBack to game
       </van-button>
     </template>
   </div>
+  <load-steps ref="stepRef" @callBack="handle"></load-steps>
 </template>
 
 <script>
 import { handleLockComponents } from '@web3/mint';
 import $web3Ext from '@web3/web3.extend';
 import { showFailToast, showSuccessToast } from 'vant';
+import loadSteps from '@/components/loadSteps';
 export default {
   name: 'M4mUnlockNFT',
+  components: { loadSteps },
   data() {
     return {
       mint: {
@@ -50,20 +53,34 @@ export default {
         walletSignature: '', // 获取到的签名
         urlSign: '', // url签名
       },
+      steps: {
+        select: 0,
+        list: [
+          { step: 1, label: 'get params ' },
+          { step: 2, label: 'connect Wallet. ' },
+          { step: 3, label: 'Lock NFT ' },
+        ],
+        show: false,
+        error: 0,
+      },
     };
   },
   created(){
   },
   mounted(){
     this.$root.loading(false);
-    this.getParams();
+    this.$refs.stepRef.steps = this.steps;
+    //this.getParams();
   },
   methods: {
     getParams(){
+      this.$refs.stepRef.steps.show = true;
       let query = {};
       query = this.$route.query;
       if(JSON.stringify(query) === '{}'){
-        let url = 'https://aradpay.gamewonderlab.io/#/mint?gameSign=0x5fc60e3b729078c839b632170a7a7a95a79ef5e6923b39f5cbb396b72c540c1a04dc4438358d7e1aba2812216a79a5c5f30bc23d423b1c84d4161c5aa82d9bd21b&guid=401963858928873894&nonce=1&params=%7b%22nonce%22%3a%201%2c%20%22params%22%3a%20%5b%7b%22name%22%3a%20%22fashionName%22%2c%20%22amount%22%3a%201%2c%20%22symbol%22%3a%20%22fashionName%22%2c%20%22prepare%22%3a%20true%2c%20%22tokenId%22%3a%20%22401963858928872084%22%7d%5d%2c%20%22m4m_token_id%22%3a%20%22399712059115176343%22%7d&tokenId=399712059115176343';
+        //let url = 'https://aradpay.gamewonderlab.io/#/lock?gameSign=&guid=401963858928879058&nonce=3435973836&params=%7b%0a%09%22m4m_token_id%22%20%3a%20%22399712059115176447%22%2c%0a%09%22nonce%22%20%3a%201%2c%0a%09%22component_ids%22%20%3a%20%5b%0a%09%09401963858928877696%0a%09%5d%0a%7d&tokenId=399712059115176447';
+        let url = 'https://aradpay.gamewonderlab.io/#/lock?gameSign=&guid=401963858928887106&nonce=3435973836&params=%7b%0a%09%22m4m_token_id%22%20%3a%20%22399712059115176545%22%2c%0a%09%22nonce%22%20%3a%202%2c%0a%09%22component_ids%22%20%3a%20%5b%0a%09%09%22401963858928886705%22%0a%09%5d%0a%7d&tokenId=399712059115176545';
+        //url = 'https%3A%2F%2Faradpay.gamewonderlab.io%2F%23%2Flock%3FgameSign%3D%26guid%3D401963858928885716%26nonce%3D2%26params%3D%7B%22m4m_token_id%22%20%3A%20%22399712059115176449%22%2C%22nonce%22%20%3A%202%2C%22component_ids%22%20%3A%20%5B%22401963858928885716%22%5D%7D%26tokenId%3D401963858928885716'
         query = this.$$.getURLParam({}, url);
       }
       /**gameSign, guid, nonce, params, tokenId**/
@@ -71,7 +88,7 @@ export default {
       this.mint.m4mTokenId = query.tokenId || query.m4mTokenId;
       this.mint.params = query.params && JSON.parse(query.params) || '';
       this.mint.nonce = this.mint.params && Number(this.mint.params.nonce) || '';
-      this.mint.params = this.mint.params && this.mint.params.params || '';
+      this.mint.params = this.mint.params && this.mint.params['component_ids'] || '';
       this.mint.gameSignerSig = query.gameSign;
       this.mint.operatorSig = Buffer.from('');
       this.mint.guid = query.guid;
@@ -80,6 +97,7 @@ export default {
     },
     getWalletAddress(){
       console.log('getWalletAddress start');
+      this.$refs.stepRef.steps.select = 1;
       $web3Ext.init('connectWallet', null, async (res) => {
         console.log('connectWallet result', res);
         if(res.err === 0){
@@ -87,23 +105,22 @@ export default {
           this.mint.owner = this.chainStore.userAddress;
           this.handleLockNFT();
         } else {
-          if(res.data){
-            showFailToast(res.data);
-          } else {
-            showFailToast('Unknown Error !');
-          }
+          let msg = res.data || 'Connect Wallet Error !';
+          showFailToast(msg);
+          this.$$.loadStepsErr(this, 1,msg);
         }
       });
     },
     handleLockNFT(){
       console.log('handleLockNFT start');
+      this.$refs.stepRef.steps.select = 2;
       let inComponentIds = [], inAmounts = [];
       if(this.mint.params){
         let item;
         for(let i=0;i<this.mint.params.length;i++){
           item = this.mint.params[i];
-          inComponentIds.push(item.tokenId);
-          inAmounts.push(item.amount);
+          inComponentIds.push(item.toString());
+          inAmounts.push(1);
         }
         console.log('handleLockNFT for components !');
       }else{
@@ -121,11 +138,15 @@ export default {
         if(res){
           showSuccessToast('lock NFT Success !');
           this.mint.txId = res.transactionHash;
-          this.handle();
+          this.$refs.stepRef.steps.select = 3;
+          //this.handle();
         }else{
           showFailToast('lock NFT Failed !');
+          this.$$.loadStepsErr(this, 2,'Failed !');
         }
       }).catch(res => {
+        res = res.toLocaleString();
+        this.$$.loadStepsErr(this, 2,'Failed !'+ res.substring(res.indexOf(':')+1, res.indexOf(';')));
         console.log('handleLockNFT catch error', res);
       });
     },

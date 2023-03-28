@@ -61,6 +61,11 @@ const $$ = {
   $copy: (obj) => {
     return JSON.parse(JSON.stringify(obj));
   },
+  loadStepsErr(vm, index, msg){
+    vm.$refs.stepRef.steps.list[index].label += msg;
+    vm.$refs.stepRef.steps.list[index].error = true;
+    vm.$refs.stepRef.steps.error += 1;
+  },
 };
 
 $$.init();

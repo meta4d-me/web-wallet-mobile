@@ -155,7 +155,13 @@ export default {
   },
   async getSignature(token, userAddress){
     console.log('getSignature: ', token, userAddress);
-    return await this.web3.eth.personal.sign(token, userAddress);
+    try{
+      let res = await this.web3.eth.personal.sign(token, userAddress);
+      return { code: 0, message: res };
+    }catch (r){
+      return r;
+    }
+    //return await this.web3.eth.personal.sign(token, userAddress);
   },
   async subscribeProvider(fn){
     if(this.hasConnected){

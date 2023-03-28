@@ -1,29 +1,32 @@
 <template>
   <div class="m4mMint">
     <van-button plain type="success" @click="getParams">
-      点击这里，开始获取unity传入参数
+      start for get game params
     </van-button>
     <template v-if="mint && mint.m4mTokenId">
       <p style="margin:20px 0; border:1px solid #f00; padding:15px;word-break: break-all;">
-        unity传入参数：{{ mint }}
+        game params: {{ mint }}
       </p>
       <van-button plain type="primary" @click="getWalletAddress()">
-        开始mint
+        start mint
       </van-button>
       <br>
       <van-button plain type="danger" @click="handle">
-        点击回传参数给unity
+        callBack to game
       </van-button>
     </template>
   </div>
+  <load-steps ref="stepRef" @callBack="handle"></load-steps>
 </template>
 
 <script>
 import { isApprovalForAll, setApprovalForAll, handleGameEnd, handleLockComponents,getGameSignerHash, getLocalGameSignerSig } from '@web3/mint';
 import $web3Ext from '@web3/web3.extend';
 import { showFailToast, showSuccessToast } from 'vant';
+import loadSteps from '@/components/loadSteps';
 export default {
   name: 'M4mMint',
+  components: { loadSteps },
   data() {
     return {
       mint: {
@@ -50,15 +53,29 @@ export default {
         walletSignature: '', // 获取到的签名
         urlSign: '', // url签名
       },
+      steps: {
+        select: 0,
+        list: [{ step: 1, label: 'get params ' },
+          { step: 2, label: 'connect Wallet. ' },
+          { step: 3, label: 'check approval status ' },
+          { step: 4, label: 'approval ' },
+          { step: 5, label: 'Lock Role ' },
+          { step: 6, label: 'Mint NFT ' },
+        ],
+        show: false,
+        error: 0,
+      },
     };
   },
   created(){
   },
   mounted(){
     this.$root.loading(false);
+    this.$refs.stepRef.steps = this.steps;
   },
   methods: {
     getParams(){
+      this.$refs.stepRef.steps.show = true;
       let query = {};
       query = this.$route.query;
       if(JSON.stringify(query) === '{}'){
@@ -97,9 +114,11 @@ export default {
         }else{
           showSuccessToast('Signature Verification Passed !');
         }
+        this.getWalletAddress();
       });
     },
     getWalletAddress(){
+      this.$refs.stepRef.steps.select = 1;
       console.log('getWalletAddress start');
       $web3Ext.init('connectWallet', null, async (res) => {
         console.log('connectWallet result', res);
@@ -108,11 +127,9 @@ export default {
           this.mint.owner = this.chainStore.userAddress;
           this.handleIsApprovalForAll();
         } else {
-          if(res.data){
-            showFailToast(res.data);
-          } else {
-            showFailToast('Unknown Error !');
-          }
+          let msg = res.data || 'Connect Wallet Error !';
+          showFailToast(msg);
+          this.$$.loadStepsErr(this, 1,msg);
         }
       });
     },
@@ -121,6 +138,7 @@ export default {
        * 先判断用户是否已经Approve签约授权
        * 然后执行mint
        **/
+      this.$refs.stepRef.steps.select = 2;
       console.log('handleIsApprovalForAll start');
       isApprovalForAll(
         this.chainStore.provider,
@@ -136,11 +154,13 @@ export default {
           this.handleSetApprovalForAll();
         }
       }).catch(res => {
+        this.$$.loadStepsErr(this, 2,'error !');
         console.log('handleIsApprovalForAll catch error', res);
       });
     },
     handleSetApprovalForAll(){
       console.log('handleSetApprovalForAll start');
+      this.$refs.stepRef.steps.select = 3;
       setApprovalForAll(
         this.chainStore.provider,
         this.mint.ERCType,
@@ -153,13 +173,16 @@ export default {
           this.handleLockRole();
         }else{
           showFailToast('User Approval Failed !');
+          this.$$.loadStepsErr(this, 3,'error !');
         }
       }).catch(res => {
+        this.$$.loadStepsErr(this, 3,'error !');
         console.log('handleSetApprovalForAll catch error', res);
       });
     },
     handleLockRole(){
       console.log('handleLockRole start');
+      this.$refs.stepRef.steps.select = 4;
       handleLockComponents(
         this.chainStore.provider,
         this.mint.targetContract,
@@ -173,13 +196,16 @@ export default {
           this.handleMintResult();
         }else{
           showFailToast('Lock Role Failed !');
+          this.$$.loadStepsErr(this, 4,'Failed !');
         }
       }).catch(res => {
+        this.$$.loadStepsErr(this, 4,'error !');
         console.log('handleLockRole catch error', res);
       });
     },
     handleMintResult(){
       console.log('handleMintResult start');
+      this.$refs.stepRef.steps.select = 5;
       handleGameEnd(
         this.chainStore.provider,
         this.mint.targetContract,
@@ -193,11 +219,14 @@ export default {
         if(res){
           showSuccessToast('Mint NFT Success !');
           this.mint.txId = res.transactionHash;
-          this.handle();
+          this.$refs.stepRef.steps.select = 6;
+          //this.handle();
         }else{
           showFailToast('Mint NFT Failed !');
+          this.$$.loadStepsErr(this, 5,'Failed !');
         }
       }).catch(res => {
+        this.$$.loadStepsErr(this, 5,'error !');
         console.log('handleMintResult catch error', res);
       });
     },

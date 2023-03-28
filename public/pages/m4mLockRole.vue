@@ -1,29 +1,32 @@
 <template>
   <div class="m4mMint">
     <van-button plain type="success" @click="getParams">
-      点击这里，开始获取unity传入参数
+      start for get game params
     </van-button>
     <template v-if="mint && mint.m4mTokenId">
       <p style="margin:20px 0; border:1px solid #f00; padding:15px;word-break: break-all;">
-        unity传入参数：{{ mint }}
+        game params: {{ mint }}
       </p>
       <van-button plain type="primary" @click="getWalletAddress()">
-        开始lock
+        start lock role
       </van-button>
       <br>
       <van-button plain type="danger" @click="handle">
-        点击回传参数给unity
+        callBack to game
       </van-button>
     </template>
   </div>
+  <load-steps ref="stepRef" @callBack="handle"></load-steps>
 </template>
 
 <script>
 import { handleLockComponents, isApprovalForAll, setApprovalForAll } from '@web3/mint';
 import $web3Ext from '@web3/web3.extend';
 import { showFailToast, showSuccessToast } from 'vant';
+import loadSteps from '@/components/loadSteps';
 export default {
   name: 'M4mUnlockNFT',
+  components: { loadSteps },
   data() {
     return {
       mint: {
@@ -50,16 +53,30 @@ export default {
         walletSignature: '', // 获取到的签名
         urlSign: '', // url签名
       },
+      steps: {
+        select: 0,
+        list: [
+          { step: 1, label: 'get params ' },
+          { step: 2, label: 'connect Wallet. ' },
+          { step: 3, label: 'check approval status ' },
+          { step: 4, label: 'approval ' },
+          { step: 5, label: 'Lock Role ' },
+        ],
+        show: false,
+        error: 0,
+      },
     };
   },
   created(){
   },
   mounted(){
     this.$root.loading(false);
-    this.getParams();
+    this.$refs.stepRef.steps = this.steps;
+    //this.getParams();
   },
   methods: {
     getParams(){
+      this.$refs.stepRef.steps.show = true;
       let query = {};
       query = this.$route.query;
       if(JSON.stringify(query) === '{}'){
@@ -74,6 +91,7 @@ export default {
     },
     getWalletAddress(){
       console.log('getWalletAddress start');
+      this.$refs.stepRef.steps.select = 1;
       $web3Ext.init('connectWallet', null, async (res) => {
         console.log('connectWallet result', res);
         if(res.err === 0){
@@ -81,16 +99,15 @@ export default {
           this.mint.owner = this.chainStore.userAddress;
           this.handleIsApprovalForAll();
         } else {
-          if(res.data){
-            showFailToast(res.data);
-          } else {
-            showFailToast('connectWallet Error !');
-          }
+          let msg = res.data || 'Connect Wallet Error !';
+          showFailToast(msg);
+          this.$$.loadStepsErr(this, 1,msg);
         }
       });
     },
     handleIsApprovalForAll(){
       console.log('handleIsApprovalForAll start');
+      this.$refs.stepRef.steps.select = 2;
       isApprovalForAll(
         this.chainStore.provider,
         this.mint.ERCType,
@@ -105,11 +122,13 @@ export default {
           this.handleSetApprovalForAll();
         }
       }).catch(res => {
-        console.log('handleIsApprovalForAll catch error', res);
+        this.$$.loadStepsErr(this, 2,'error !');
+        console.log('handleSetApprovalForAll catch error', res);
       });
     },
     handleSetApprovalForAll(){
       console.log('handleSetApprovalForAll start');
+      this.$refs.stepRef.steps.select = 3;
       setApprovalForAll(
         this.chainStore.provider,
         this.mint.ERCType,
@@ -122,13 +141,16 @@ export default {
           this.handleLockRole();
         }else{
           showFailToast('User Approval Failed !');
+          this.$$.loadStepsErr(this, 3,'error !');
         }
       }).catch(res => {
+        this.$$.loadStepsErr(this, 3,'error !');
         console.log('handleSetApprovalForAll catch error', res);
       });
     },
     handleLockRole(){
       console.log('handleLockRole start');
+      this.$refs.stepRef.steps.select = 4;
       handleLockComponents(
         this.chainStore.provider,
         this.mint.targetContract,
@@ -140,11 +162,15 @@ export default {
         console.log('handleLockRole general result', res);
         if(res){
           showSuccessToast('Lock Role Success !');
-          this.handle();
+          //this.handle();
+          this.$refs.stepRef.steps.select = 5;
         }else{
           showFailToast('Lock Role Failed !');
+          this.$$.loadStepsErr(this, 4,'error !');
         }
       }).catch(res => {
+        res = res.toLocaleString();
+        this.$$.loadStepsErr(this, 4,'Failed !'+ res.substring(res.indexOf(':')+1, res.indexOf(';')));
         console.log('handleLockRole catch error', res);
       });
     },

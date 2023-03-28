@@ -41,5 +41,5 @@ export default {
 };
 </script>
 <style scoped>
-#demoApp { padding:50px; }
+#demoApp { padding:20px; }
 </style>
