@@ -18,6 +18,29 @@ const _abi = [
         type: "uint256",
       },
       {
+        internalType: "uint256[]",
+        name: "inComponentIds",
+        type: "uint256[]",
+      },
+      {
+        internalType: "uint256[]",
+        name: "inAmounts",
+        type: "uint256[]",
+      },
+    ],
+    name: "appendLock",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "m4mTokenId",
+        type: "uint256",
+      },
+      {
         internalType: "uint256",
         name: "gameId",
         type: "uint256",

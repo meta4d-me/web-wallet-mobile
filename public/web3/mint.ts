@@ -74,7 +74,7 @@ export const getLocalGameSignerSig = async(signHash, KEY) => {
 
 /**provider: any,targetContract: string,m4mTokenId: number,nonce: number,params: {tokenId: number;prepare: boolean;name: string;symbol: string; amount: number;}[],
  operatorSig: string,gameSignerSig: string,overrides?: any**/
-export const handleGameEnd = async (provider, targetContract, m4mTokenId, nonce, params, operatorSig, gameSignerSig) => {
+export const handleSettleNewLoots = async (provider, targetContract, m4mTokenId, nonce, params, operatorSig, gameSignerSig) => {
     provider = provider && new ethers.providers.Web3Provider(provider) || await getProvider('Injected');
     const baggage = new Contract(targetContract, M4mBaggageWithoutRole__factory.abi,  provider.getSigner()) as M4mBaggageWithoutRole;
     console.log('settleNewLoots baggage', baggage);
@@ -84,38 +84,57 @@ export const handleGameEnd = async (provider, targetContract, m4mTokenId, nonce,
     return await tx.wait();
 };
 
-/**provider: any, targetContract: string, m4mTokenId: number, nonce: number, outComponentIds: number[], operatorSig: string, gameSignerSig: string**/
-export const handleUnlockComponents = async(provider, targetContract, m4mTokenId, nonce, outComponentIds, operatorSig, gameSignerSig) => {
+/**lootIds代表用户赢到的装备，lostIds代表用户失去的装备，lootId代表mint给用户地址，lostId代表销毁用户lock的装备。两个东西设成相同的，就等价于将用户lock的装备解锁出来给用户。**/
+/**provider: any, targetContract: string, m4mTokenId: BigNumberish, nonce: BigNumberish, lootIds: BigNumberish[], lootAmounts: BigNumberish[], lostIds: BigNumberish[], lostAmounts: BigNumberish[], operatorSig: BytesLike,gameSignerSig: BytesLike,overrides?: CallOverrides**/
+export const handleUnlockComponents = async(provider, targetContract, m4mTokenId, nonce, lootIds, lootAmounts, lostIds, lostAmounts, operatorSig, gameSignerSig) => {
     provider = provider && new ethers.providers.Web3Provider(provider) || await getProvider('Injected');
     const baggage = new Contract(targetContract, M4mBaggageWithoutRole__factory.abi, provider.getSigner()) as M4mBaggageWithoutRole;
     console.log('handleUnlockComponents baggage', baggage);
-    let tx = await baggage.unlockComponents(m4mTokenId, nonce, outComponentIds, operatorSig, gameSignerSig);
+    let tx = await baggage.settleLoots(m4mTokenId, nonce, lootIds, lootAmounts, lostIds, lostAmounts, operatorSig, gameSignerSig);
     return await tx.wait();
 }
 
-/**provider: any, targetContract: string, m4mTokenId: number, gameId: number, inComponentIds: number[], inAmounts: number[]**/
-export const handleLockComponents = async(provider, targetContract, m4mTokenId, gameId, inComponentIds, inAmounts) => {
+/**provider: any, targetContract: string, m4mTokenId: number, inComponentIds: number[], inAmounts: number[]**/
+export const handleLockComponents = async(provider, targetContract, m4mTokenId, inComponentIds, inAmounts) => {
     console.log('targetContract', targetContract);
     console.log('m4mTokenId', m4mTokenId);
-    console.log('gameId', gameId);
     console.log('inComponentIds', inComponentIds);
     console.log('inAmounts', inAmounts);
-    //inComponentIds = [];
-    //inAmounts = [];
     provider = provider && new ethers.providers.Web3Provider(provider) || await getProvider('Injected');
     const baggage = new Contract(targetContract, M4mBaggageWithoutRole__factory.abi, provider.getSigner()) as M4mBaggageWithoutRole;
     console.log('handleLockComponents baggage', baggage);
     let info = await baggage.lockedEmptyNFTs(m4mTokenId);
     console.log('handleLockComponents info', info);
     console.log('handleLockComponents info gameId',Number(info.gameId));
+    //if(!!Number(info.gameId)){
+        //return {success:true};
+    //}else{
+        console.log('handleLockComponents tx step');
+        let tx = await baggage.appendLock(m4mTokenId, inComponentIds, inAmounts);
+        console.log('handleLockComponents tx', tx);
+        return await tx.wait();
+    //}
+}
+
+/**provider: any, targetContract: string, m4mTokenId: number, gameId: number, inComponentIds: number[], inAmounts: number[]**/
+export const handleLockRoleNFT = async(provider, targetContract, m4mTokenId, gameId, inComponentIds, inAmounts) => {
+    console.log('targetContract', targetContract);
+    console.log('m4mTokenId', m4mTokenId);
+    console.log('gameId', gameId);
+    console.log('inComponentIds', inComponentIds);
+    console.log('inAmounts', inAmounts);
+    provider = provider && new ethers.providers.Web3Provider(provider) || await getProvider('Injected');
+    const baggage = new Contract(targetContract, M4mBaggageWithoutRole__factory.abi, provider.getSigner()) as M4mBaggageWithoutRole;
+    console.log('handleLockRoleNFT baggage', baggage);
+    let info = await baggage.lockedEmptyNFTs(m4mTokenId);
+    console.log('handleLockRoleNFT info', info);
+    console.log('handleLockRoleNFT info gameId',Number(info.gameId));
     if(!!Number(info.gameId)){
         return {success:true};
     }else{
-        console.log('handleLockComponents tx step');
+        console.log('handleLockRoleNFT tx step');
         let tx = await baggage.lockComponents(m4mTokenId, gameId, inComponentIds, inAmounts);
-        console.log('handleLockComponents tx', tx);
+        console.log('handleLockRoleNFT tx', tx);
         return await tx.wait();
     }
 }
-
-

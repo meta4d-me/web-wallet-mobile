@@ -9,7 +9,7 @@ class MultiModule {
   constructor (name, opts) {
     Object.assign(this, {
       name,
-      port: 8000,
+      port: 9010,
       host: '0.0.0.0',
       filename: '',
       title: '',
@@ -66,7 +66,7 @@ const importModules = [new MultiModule('demoApp', {
   host: 'localhost',
   filename: 'index.html',
   title: 'h5 web3 wallet',
-  sysName: 'demoApp',
+  sysName: 'dungeondual',
   bridge: 'unity',
   appId: 1,
 })];

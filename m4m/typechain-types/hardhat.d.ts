@@ -177,6 +177,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IManager__factory>;
     getContractFactory(
+      name: "IManagerV2",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IManagerV2__factory>;
+    getContractFactory(
       name: "M4mBaggage",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.M4mBaggage__factory>;
@@ -220,6 +224,10 @@ declare module "hardhat/types/runtime" {
       name: "Manager",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Manager__factory>;
+    getContractFactory(
+      name: "ManagerV2",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ManagerV2__factory>;
     getContractFactory(
       name: "Zip",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -435,6 +443,11 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.IManager>;
     getContractAt(
+      name: "IManagerV2",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IManagerV2>;
+    getContractAt(
       name: "M4mBaggage",
       address: string,
       signer?: ethers.Signer
@@ -489,6 +502,11 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.Manager>;
+    getContractAt(
+      name: "ManagerV2",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ManagerV2>;
     getContractAt(
       name: "Zip",
       address: string,

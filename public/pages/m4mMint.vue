@@ -16,11 +16,11 @@
       </van-button>
     </template>
   </div>
-  <load-steps ref="stepRef" @callBack="handle"></load-steps>
+  <load-steps ref="stepRef" @callBack="handle" />
 </template>
 
 <script>
-import { isApprovalForAll, setApprovalForAll, handleGameEnd, handleLockComponents,getGameSignerHash, getLocalGameSignerSig } from '@web3/mint';
+import { isApprovalForAll, setApprovalForAll, handleSettleNewLoots, getGameSignerHash, getLocalGameSignerSig, handleLockRoleNFT } from '@web3/mint';
 import $web3Ext from '@web3/web3.extend';
 import { showFailToast, showSuccessToast } from 'vant';
 import loadSteps from '@/components/loadSteps';
@@ -55,7 +55,8 @@ export default {
       },
       steps: {
         select: 0,
-        list: [{ step: 1, label: 'get params ' },
+        list: [
+          { step: 1, label: 'get params ' },
           { step: 2, label: 'connect Wallet. ' },
           { step: 3, label: 'check approval status ' },
           { step: 4, label: 'approval ' },
@@ -72,6 +73,9 @@ export default {
   mounted(){
     this.$root.loading(false);
     this.$refs.stepRef.steps = this.steps;
+    if(process.env.prod === 'prod'){
+      this.getParams();
+    }
   },
   methods: {
     getParams(){
@@ -92,7 +96,8 @@ export default {
       this.mint.operatorSig = Buffer.from('');
       this.mint.guid = query.guid;
       console.log('this.mint', this.mint);
-      this.handleGetGameSignerHash();
+      //this.handleGetGameSignerHash();
+      this.getWalletAddress();
     },
     handleGetGameSignerHash(){
       getGameSignerHash(
@@ -102,6 +107,10 @@ export default {
         this.mint.nonce,
       ).then(res => {
         this.handleGetLocalGameSignerSig(res);
+      }).catch(() => {
+        if(process.env.prod === 'prod'){
+          window.location.href = 'uniwebview://close?t='+new Date().valueOf();
+        }
       });
     },
     handleGetLocalGameSignerSig(hash){
@@ -114,7 +123,11 @@ export default {
         }else{
           showSuccessToast('Signature Verification Passed !');
         }
-        this.getWalletAddress();
+        //this.getWalletAddress();
+      }).catch(() => {
+        if(process.env.prod === 'prod'){
+          window.location.href = 'uniwebview://close?t='+new Date().valueOf();
+        }
       });
     },
     getWalletAddress(){
@@ -130,6 +143,9 @@ export default {
           let msg = res.data || 'Connect Wallet Error !';
           showFailToast(msg);
           this.$$.loadStepsErr(this, 1,msg);
+          if(process.env.prod === 'prod'){
+            window.location.href = 'uniwebview://close?route=mint&step=1&t='+new Date().valueOf()+'&error='+msg;
+          }
         }
       });
     },
@@ -156,6 +172,9 @@ export default {
       }).catch(res => {
         this.$$.loadStepsErr(this, 2,'error !');
         console.log('handleIsApprovalForAll catch error', res);
+        if(process.env.prod === 'prod'){
+          window.location.href = 'uniwebview://close?route=mint&step=2&t='+new Date().valueOf()+'&error=handleIsApprovalForAll catch error, '+res.toString();
+        }
       });
     },
     handleSetApprovalForAll(){
@@ -174,16 +193,22 @@ export default {
         }else{
           showFailToast('User Approval Failed !');
           this.$$.loadStepsErr(this, 3,'error !');
+          if(process.env.prod === 'prod'){
+            window.location.href = 'uniwebview://close?route=mint&step=3&t='+new Date().valueOf()+'&error=User Approval Failed !';
+          }
         }
       }).catch(res => {
         this.$$.loadStepsErr(this, 3,'error !');
         console.log('handleSetApprovalForAll catch error', res);
+        if(process.env.prod === 'prod'){
+          window.location.href = 'uniwebview://close?route=mint&step=3&t='+new Date().valueOf()+'&error=handleSetApprovalForAll catch error, '+res.toString();
+        }
       });
     },
     handleLockRole(){
       console.log('handleLockRole start');
       this.$refs.stepRef.steps.select = 4;
-      handleLockComponents(
+      handleLockRoleNFT(
         this.chainStore.provider,
         this.mint.targetContract,
         this.mint.m4mTokenId.toString(),
@@ -197,16 +222,22 @@ export default {
         }else{
           showFailToast('Lock Role Failed !');
           this.$$.loadStepsErr(this, 4,'Failed !');
+          if(process.env.prod === 'prod'){
+            window.location.href = 'uniwebview://close?route=mint&step=4&t='+new Date().valueOf()+'&msg=Lock Role Failed !';
+          }
         }
       }).catch(res => {
         this.$$.loadStepsErr(this, 4,'error !');
         console.log('handleLockRole catch error', res);
+        if(process.env.prod === 'prod'){
+          window.location.href = 'uniwebview://close?route=mint&step=4&t='+new Date().valueOf()+'&msg=handleLockRole catch error, '+res.toString();
+        }
       });
     },
     handleMintResult(){
       console.log('handleMintResult start');
       this.$refs.stepRef.steps.select = 5;
-      handleGameEnd(
+      handleSettleNewLoots(
         this.chainStore.provider,
         this.mint.targetContract,
         this.mint.m4mTokenId.toString(),
@@ -220,19 +251,29 @@ export default {
           showSuccessToast('Mint NFT Success !');
           this.mint.txId = res.transactionHash;
           this.$refs.stepRef.steps.select = 6;
-          //this.handle();
+          if(process.env.prod === 'prod'){
+            this.handle();
+          }
         }else{
           showFailToast('Mint NFT Failed !');
           this.$$.loadStepsErr(this, 5,'Failed !');
+          if(process.env.prod === 'prod'){
+            window.location.href = 'uniwebview://close?route=mint&step=5&t='+new Date().valueOf()+'&msg=Mint NFT Failed !';
+          }
         }
       }).catch(res => {
         this.$$.loadStepsErr(this, 5,'error !');
         console.log('handleMintResult catch error', res);
+        if(process.env.prod === 'prod'){
+          window.location.href = 'uniwebview://close?route=mint&step=5&t='+new Date().valueOf()+'&msg=handleMintResult catch error, '+res.toString();
+        }
       });
     },
     handle(){
-      let obj = { guid: this.mint.guid, txId: this.mint.txId, t: new Date().valueOf() }
-      window.location.href = 'uniwebview://mint'+this.$$.Obj2String(obj);
+      setTimeout(() => {
+        let obj = { guid: this.mint.guid, txId: this.mint.txId, t: new Date().valueOf() }
+        window.location.href = 'uniwebview://mint'+this.$$.Obj2String(obj);
+      }, 2000);
     },
   },
 };

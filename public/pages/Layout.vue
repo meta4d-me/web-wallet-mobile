@@ -1,6 +1,6 @@
 <template>
   <nav>
-    <van-icon name="close" class="close Flex" @click="handleAction('close')" />
+    <van-icon name="close" class="close Flex" @click="handleAction('close')" v-if="env === 'dev'"/>
     <h2 class="black">
       web3 demo
     </h2>
@@ -20,6 +20,8 @@
     </ul>
   </nav>
 
+
+
   <router-view v-slot="{ Component }">
     <keep-alive :max="1">
       <component v-if="$route.meta.keepAlive" :is="Component" :key="$route.fullPath" />
@@ -28,14 +30,13 @@
   </router-view>
 </template>
 <script>
-import { Button, Icon, Loading } from 'vant';
+import { Button, Icon } from 'vant';
 export default {
   // eslint-disable-next-line vue/multi-word-component-names
   name: 'Layout',
-  components: { 'van-button': Button, 'van-icon': Icon, 'van-loading': Loading },
+  components: { 'van-button': Button, 'van-icon': Icon },
   data() {
     return {
-      steps: { },
       ul: [
         { label: 'get Wallet Address', path: 'getWalletAddress', show: true },
         { label: 'Mint Work Flow', path: 'mint', show: true },
@@ -44,13 +45,15 @@ export default {
         { label: 'Unlock Work Flow', path: 'unlock', show: true },
         { label: 'query image', path: 'pic', show: false },
       ],
+      env: process.env.prod,
     };
   },
   created(){
 
   },
   mounted(){
-    this.$$.$('html').classList.add(this.$$.ENV.env);
+    this.$$.$('html').classList.add(this.$$.ENV.env, process.env.prod);
+    this.$$.$('html').setAttribute('sys', process.env.sysName);
     this.$root.loading(false);
   },
   methods: {

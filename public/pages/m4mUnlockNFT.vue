@@ -16,7 +16,7 @@
       </van-button>
     </template>
   </div>
-  <load-steps ref="stepRef" @callBack="handle"></load-steps>
+  <load-steps ref="stepRef" @callBack="handle" />
 </template>
 
 <script>
@@ -57,8 +57,7 @@ export default {
         select: 0,
         list: [{ step: 1, label: 'get params ' },
           { step: 2, label: 'connect Wallet. ' },
-          { step: 3, label: 'unlock NFT ' },
-        ],
+          { step: 3, label: 'unlock NFT ' }],
         show: false,
         error: 0,
       },
@@ -69,6 +68,9 @@ export default {
   mounted(){
     this.$root.loading(false);
     this.$refs.stepRef.steps = this.steps;
+    if(process.env.prod === 'prod'){
+      this.getParams();
+    }
   },
   methods: {
     getParams(){
@@ -76,7 +78,7 @@ export default {
       let query = {};
       query = this.$route.query;
       if(JSON.stringify(query) === '{}'){
-        let url = 'https://aradpay.gamewonderlab.io/#/lock?gameSign=&guid=401963858928879058&nonce=3435973836&params=%7b%0a%09%22m4m_token_id%22%20%3a%20%22399712059115176447%22%2c%0a%09%22nonce%22%20%3a%201%2c%0a%09%22component_ids%22%20%3a%20%5b%0a%09%09401963858928877696%0a%09%5d%0a%7d&tokenId=399712059115176447';
+        let url = 'https://aradpay.gamewonderlab.io/#/unlock?gameSign=&guid=401963858928879058&nonce=3435973836&params=%7b%0a%09%22m4m_token_id%22%20%3a%20%22399712059115176447%22%2c%0a%09%22nonce%22%20%3a%201%2c%0a%09%out_component_ids%22%20%3a%20%5b%0a%09%09401963858928877696%0a%09%5d%0a%7d&tokenId=399712059115176447';
         query = this.$$.getURLParam({}, url);
       }
       /**gameSign, guid, nonce, params, tokenId**/
@@ -104,16 +106,20 @@ export default {
           let msg = res.data || 'Connect Wallet Error !';
           showFailToast(msg);
           this.$$.loadStepsErr(this, 1,msg);
+          if(process.env.prod === 'prod'){
+            window.location.href = 'uniwebview://close?route=UnlockNFT&step=1&t='+new Date().valueOf()+'&error='+msg;
+          }
         }
       });
     },
     handleUnlockNFT(){
       console.log('handleUnlockNFT start');
       this.$refs.stepRef.steps.select = 2;
-      let outComponentIds = [];
+      let componentIds = [], amountIds = [];
       if(this.mint.params){
         for(let i=0;i<this.mint.params.length;i++){
-          outComponentIds.push(this.mint.params[i]);
+          componentIds.push(this.mint.params[i]);
+          amountIds.push(1);
         }
         console.log('handleUnlockNFT for components !');
       }else{
@@ -124,7 +130,10 @@ export default {
         this.mint.targetContract,
         this.mint.m4mTokenId.toString(),
         this.mint.nonce,
-        outComponentIds,
+        componentIds, // lootIds
+        amountIds, // lootAmounts
+        componentIds, // lostIds
+        amountIds, // lostAmounts
         this.mint.operatorSig,
         this.mint.gameSignerSig,
       ).then(res => {
@@ -133,20 +142,30 @@ export default {
           showSuccessToast('Unlock NFT Success !');
           this.mint.txId = res.transactionHash;
           this.$refs.stepRef.steps.select = 3;
-          //this.handle();
+          if(process.env.prod === 'prod'){
+            this.handle();
+          }
         }else{
           showFailToast('Unlock NFT Failed !');
           this.$$.loadStepsErr(this, 2,'Failed !');
+          if(process.env.prod === 'prod'){
+            window.location.href = 'uniwebview://close?route=UnlockNFT&step=2&t='+new Date().valueOf()+'&error=general result Unlock NFT Failed !';
+          }
         }
       }).catch(res => {
         res = res.toLocaleString();
         this.$$.loadStepsErr(this, 2,'Failed ! '+ res.substring(res.indexOf(':')+1, res.indexOf('(')));
         console.log('handleUnlockNFT catch error', res);
+        if(process.env.prod === 'prod'){
+          window.location.href = 'uniwebview://close?route=UnlockNFT&step=2&t='+new Date().valueOf()+'&error=handleUnlockNFT catch error, '+res;
+        }
       });
     },
     handle(){
-      let obj = { guid: this.mint.guid, txId: this.mint.txId, t: new Date().valueOf() }
-      window.location.href = 'uniwebview://unlock'+this.$$.Obj2String(obj);
+      setTimeout(() => {
+        let obj = { guid: this.mint.guid, txId: this.mint.txId, t: new Date().valueOf() }
+        window.location.href = 'uniwebview://unlock'+this.$$.Obj2String(obj);
+      }, 2000);
     },
   },
 };

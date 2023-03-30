@@ -20,7 +20,7 @@
 </template>
 
 <script>
-import { handleLockComponents, isApprovalForAll, setApprovalForAll } from '@web3/mint';
+import { handleLockRoleNFT, isApprovalForAll, setApprovalForAll } from '@web3/mint';
 import $web3Ext from '@web3/web3.extend';
 import { showFailToast, showSuccessToast } from 'vant';
 import loadSteps from '@/components/loadSteps';
@@ -72,7 +72,9 @@ export default {
   mounted(){
     this.$root.loading(false);
     this.$refs.stepRef.steps = this.steps;
-    //this.getParams();
+    if(process.env.prod === 'prod'){
+      this.getParams();
+    }
   },
   methods: {
     getParams(){
@@ -102,6 +104,9 @@ export default {
           let msg = res.data || 'Connect Wallet Error !';
           showFailToast(msg);
           this.$$.loadStepsErr(this, 1,msg);
+          if(process.env.prod === 'prod'){
+            window.location.href = 'uniwebview://close?route=lockRole&step=1&t='+new Date().valueOf()+'&error='+msg;
+          }
         }
       });
     },
@@ -123,7 +128,10 @@ export default {
         }
       }).catch(res => {
         this.$$.loadStepsErr(this, 2,'error !');
-        console.log('handleSetApprovalForAll catch error', res);
+        console.log('handleIsApprovalForAll catch error', res);
+        if(process.env.prod === 'prod'){
+          window.location.href = 'uniwebview://close?route=lockRole&step=2&t='+new Date().valueOf()+'&error=handleIsApprovalForAll catch error, '+res.toString();
+        }
       });
     },
     handleSetApprovalForAll(){
@@ -142,16 +150,22 @@ export default {
         }else{
           showFailToast('User Approval Failed !');
           this.$$.loadStepsErr(this, 3,'error !');
+          if(process.env.prod === 'prod'){
+            window.location.href = 'uniwebview://close?route=lockRole&step=3&t='+new Date().valueOf()+'&error=User Approval Failed !';
+          }
         }
       }).catch(res => {
         this.$$.loadStepsErr(this, 3,'error !');
         console.log('handleSetApprovalForAll catch error', res);
+        if(process.env.prod === 'prod'){
+          window.location.href = 'uniwebview://close?route=lockRole&step=3&t='+new Date().valueOf()+'&error=handleSetApprovalForAll catch error, '+res.toString();
+        }
       });
     },
     handleLockRole(){
       console.log('handleLockRole start');
       this.$refs.stepRef.steps.select = 4;
-      handleLockComponents(
+      handleLockRoleNFT(
         this.chainStore.provider,
         this.mint.targetContract,
         this.mint.m4mTokenId.toString(),
@@ -162,21 +176,31 @@ export default {
         console.log('handleLockRole general result', res);
         if(res){
           showSuccessToast('Lock Role Success !');
-          //this.handle();
           this.$refs.stepRef.steps.select = 5;
+          if(process.env.prod === 'prod'){
+            this.handle();
+          }
         }else{
           showFailToast('Lock Role Failed !');
           this.$$.loadStepsErr(this, 4,'error !');
+          if(process.env.prod === 'prod'){
+            window.location.href = 'uniwebview://close?route=lockRole&step=4&t='+new Date().valueOf()+'&error=Lock Role Failed !';
+          }
         }
       }).catch(res => {
         res = res.toLocaleString();
         this.$$.loadStepsErr(this, 4,'Failed !'+ res.substring(res.indexOf(':')+1, res.indexOf(';')));
         console.log('handleLockRole catch error', res);
+        if(process.env.prod === 'prod'){
+          window.location.href = 'uniwebview://close?route=lockRole&step=4&t='+new Date().valueOf()+'&msg=handleLockRole catch error, '+res.toString();
+        }
       });
     },
     handle(){
-      let obj = { success: 1, t: new Date().valueOf() }
-      window.location.href = 'uniwebview://lockRole'+this.$$.Obj2String(obj);
+      setTimeout(() => {
+        let obj = { success: 1, t: new Date().valueOf() }
+        window.location.href = 'uniwebview://lockRole'+this.$$.Obj2String(obj);
+      }, 2000);
     },
   },
 };
