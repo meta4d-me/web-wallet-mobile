@@ -58,6 +58,7 @@ export declare namespace IM4mComponentsV2 {
 export interface M4mBaggageWithoutRoleInterface extends utils.Interface {
   contractName: "M4mBaggageWithoutRole";
   functions: {
+    "appendLock(uint256,uint256[],uint256[])": FunctionFragment;
     "gameBegin(uint256,string,uint256,uint256[],uint256[])": FunctionFragment;
     "gameEnd(uint256,uint256[],uint256[],uint256[],uint256[],bytes,bytes)": FunctionFragment;
     "getGameOwner(uint256)": FunctionFragment;
@@ -83,6 +84,10 @@ export interface M4mBaggageWithoutRoleInterface extends utils.Interface {
     "unlockComponents(uint256,uint256,uint256[],bytes,bytes)": FunctionFragment;
   };
 
+  encodeFunctionData(
+    functionFragment: "appendLock",
+    values: [BigNumberish, BigNumberish[], BigNumberish[]]
+  ): string;
   encodeFunctionData(
     functionFragment: "gameBegin",
     values: [BigNumberish, string, BigNumberish, BigNumberish[], BigNumberish[]]
@@ -190,6 +195,7 @@ export interface M4mBaggageWithoutRoleInterface extends utils.Interface {
     values: [BigNumberish, BigNumberish, BigNumberish[], BytesLike, BytesLike]
   ): string;
 
+  decodeFunctionResult(functionFragment: "appendLock", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "gameBegin", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "gameEnd", data: BytesLike): Result;
   decodeFunctionResult(
@@ -350,6 +356,13 @@ export interface M4mBaggageWithoutRole extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
+    appendLock(
+      m4mTokenId: BigNumberish,
+      inComponentIds: BigNumberish[],
+      inAmounts: BigNumberish[],
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
     gameBegin(
       gameId: BigNumberish,
       uuid: string,
@@ -517,6 +530,13 @@ export interface M4mBaggageWithoutRole extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
   };
+
+  appendLock(
+    m4mTokenId: BigNumberish,
+    inComponentIds: BigNumberish[],
+    inAmounts: BigNumberish[],
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
 
   gameBegin(
     gameId: BigNumberish,
@@ -686,6 +706,13 @@ export interface M4mBaggageWithoutRole extends BaseContract {
   ): Promise<ContractTransaction>;
 
   callStatic: {
+    appendLock(
+      m4mTokenId: BigNumberish,
+      inComponentIds: BigNumberish[],
+      inAmounts: BigNumberish[],
+      overrides?: CallOverrides
+    ): Promise<void>;
+
     gameBegin(
       gameId: BigNumberish,
       uuid: string,
@@ -888,6 +915,13 @@ export interface M4mBaggageWithoutRole extends BaseContract {
   };
 
   estimateGas: {
+    appendLock(
+      m4mTokenId: BigNumberish,
+      inComponentIds: BigNumberish[],
+      inAmounts: BigNumberish[],
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
     gameBegin(
       gameId: BigNumberish,
       uuid: string,
@@ -1045,6 +1079,13 @@ export interface M4mBaggageWithoutRole extends BaseContract {
   };
 
   populateTransaction: {
+    appendLock(
+      m4mTokenId: BigNumberish,
+      inComponentIds: BigNumberish[],
+      inAmounts: BigNumberish[],
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
     gameBegin(
       gameId: BigNumberish,
       uuid: string,

@@ -27,8 +27,8 @@
     npm run dev
 
 ### 打包命令
-    npm run build-test
-    npm run build-uat
-    npm run build-prod
+    npm run build-test  测试开发打包
+    npm run build-uat   uat环境打包
+    npm run build-prod  生产环境打包，录屏打包
 
 

@@ -16,7 +16,7 @@
       "@/": ["./public/*"],//格式一定要写对符号*不能少不然找不到@或者没有代码提示
       "@utils/": ["./public/utils/*"],
       "@web3/": ["./public/web3/*"],
-      "@App/": ["./demoApp/*"],
+      "@App/": ["./dungeondual/*"],
       "@m4m/": ["./m4m/*"]
     },
     "allowJs": true

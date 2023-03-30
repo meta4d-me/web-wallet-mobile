@@ -15,6 +15,9 @@
         </dd>
       </dl>
     </div>
+    <div>
+      宽：{{W}}，高：{{H}}
+    </div>
     <div class="btn Flex">
       <van-button plain size="small" type="danger" @click="handleAction('close')" v-if="prod !== 'prod' && steps.list && steps.list.length > 0 && steps.select !== steps.list.length">
         close work flow<template v-if="steps.error">, error {{steps.error}}</template>
@@ -44,12 +47,16 @@ export default {
         error: 0,
       },
       prod: process.env.prod,
+      W: null,
+      H: null
     };
   },
   created(){
 
   },
   mounted(){
+    this.W = this.$$.$('html').offsetWidth;
+    this.H = this.$$.$('html').offsetHeight;
   },
   methods: {
     handleAction(type){

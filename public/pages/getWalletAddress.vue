@@ -15,7 +15,7 @@
       </van-button>
     </template>
   </div>
-  <load-steps ref="stepRef" @callBack="handle"></load-steps>
+  <load-steps ref="stepRef" @callBack="handle" />
 </template>
 <script>
 import $web3Ext from '@web3/web3.extend';
@@ -50,16 +50,12 @@ export default {
   },
   mounted(){
     this.$root.loading(false);
-    if(process.env.prod !== 'dev'){
-      //this.getWalletAddress();
-    }
     this.$refs.stepRef.steps = this.steps;
+    if(process.env.prod === 'prod'){
+      this.getWalletAddress();
+    }
   },
   methods: {
-    handle(){
-      let obj = { userWalletAddress: this.chainStore.userAddress, userWalletSignature: this.chainStore.walletSignature, t: new Date().valueOf() }
-      window.location.href = 'uniwebview://getWalletAddress'+this.$$.Obj2String(obj);
-    },
     getWalletAddress(){
       this.$refs.stepRef.steps.show = true;
       console.log('getWalletAddress start');
@@ -72,21 +68,36 @@ export default {
           let msg = res.data || 'Connect Wallet Error !';
           showFailToast(msg);
           this.$$.loadStepsErr(this, 0,msg);
+          if(process.env.prod === 'prod'){
+            window.location.href = 'uniwebview://close?route=getWallerAddress&step=1&t='+new Date().valueOf()+'&error='+msg;
+          }
         }
       });
     },
     getSignature(){
       this.$refs.stepRef.steps.select = 2;
       $web3Ext.getSignature(this.chainStore.urlSign, this.chainStore.userAddress).then(r => {
-        this.$refs.stepRef.steps.select = 3;
         console.log('getSignature success:', r);
         if(r.code === 0){
+          this.$refs.stepRef.steps.select = 3;
           this.chainStore.walletSignature = r.message;
+          if(process.env.prod === 'prod'){
+            this.handle();
+          }
         }else{
-          //this.chainStore.walletSignature = r;
-          this.$$.loadStepsErr(this, 2,r.message || 'unknown error !');
+          let msg = r.message || 'unknown error !';
+          this.$$.loadStepsErr(this, 2,msg);
+          if(process.env.prod === 'prod'){
+            window.location.href = 'uniwebview://close?route=getWallerAddress&step=3&t='+new Date().valueOf()+'&msg='+msg;
+          }
         }
       });
+    },
+    handle(){
+      setTimeout(() => {
+        let obj = { userWalletAddress: this.chainStore.userAddress, userWalletSignature: this.chainStore.walletSignature, t: new Date().valueOf() }
+        window.location.href = 'uniwebview://getWalletAddress'+this.$$.Obj2String(obj);
+      }, 2000);
     },
   },
 };

@@ -1,6 +1,5 @@
 
 html, body, #demoApp { min-height:100%; height:100%; overflow:visible; position: relative; }
-html { background:#f5f5f5; }
 * { list-style:none; margin:0; padding:0; outline:0; -webkit-box-sizing:content-box; box-sizing:content-box; -webkit-tap-highlight-color:transparent; appearance:inherit; -webkit-tap-highlight-color:rgba(0,0,0,0); }
 body { width:100%; font-size:14px; font-family:PingFang SC, San Francisco, Heiti SC, 黑体-简, Helvetica; color:#6c6c6c; -webkit-touch-callout: none; -webkit-text-size-adjust:none; }
 #app { padding-bottom:env(safe-area-inset-bottom); min-height:100%; height:100%; }
@@ -66,32 +65,31 @@ article,aside,figcaption,figure,footer,header,hgroup,main,nav,section{display:bl
 .van-image .van-image__loading { background:#000; z-index: -1; }
 .van-toast--unclickable { /**width:300px;**/ }
 .van-button { max-width: 100%; word-break: break-all; }
-/**通用lazyLoad**/
-.success { -webkit-animation:fadeIn 01s ease 0.2s 1 both; animation:fadeIn 1s ease 0.2s 1 both; -moz-animation:fadeIn 1s ease 0.2s 1 both; -o-animation:fadeIn 1s ease 0.2s 1 both; -ms-animation:fadeIn 1s ease 0.2s 1 both; }
-@-webkit-keyframes fadeIn {
-  from { opacity:0; }
-  to { opacity:1; }
-}
-@keyframes fadeIn {
-  from { opacity:0; }
-  to { opacity:1; }
-}
+/**
 
+**/
 /**更改unity web3弹窗**/
-.uYscM.web3modal-modal-lightbox { z-index: 999; }
-.unity #walletconnect-wrapper { background: rgba(37, 41, 46, 0.95); }
-.unity #walletconnect-qrcode-modal { padding: 0; background: none; position: relative; top: auto; width: auto; left: auto; height: auto; transition: none; will-change: auto; }
-.unity .walletconnect-modal__base { will-change: auto; transform:none; }
-.unity .walletconnect-search__input { width:calc(100% - 32px) !important; }
+.mobile .walletconnect-wrapper { background: rgba(37, 41, 46, 0.95); }
+.mobile #walletconnect-qrcode-modal { width:100%; padding:0; }
+.mobile .walletconnect-modal__base { padding:10px; max-width:300px; }
+.mobile .walletconnect-modal__mobile__toggle { margin-bottom:10px; }
+.mobile .walletconnect-modal__header { position:relative; left:auto; top:auto; display:flex; -webkit-box-pack:center; justify-content:center; align-items:center;  }
+.mobile .walletconnect-modal__header p { color:#222; display: contents; flex: auto; }
+.mobile .walletconnect-modal__header .walletconnect-modal__headerLogo { margin:0 5px 0 0; }
+.mobile .walletconnect-modal__header .walletconnect-modal__close__wrapper { position: fixed; top: 5px; right: 5px; }
+.mobile .walletconnect-connect__buttons__wrapper__android { margin: 110px 0; }
+.mobile #walletconnect-qrcode-text { font-size:14px; margin: 0 0 10px; }
+.mobile .walletconnect-qrcode__image { width: 200px;  }
+.mobile .walletconnect-modal__footer { margin:5px 0 0; }
 
-.mobile .unity. #walletconnect-qrcode-modal { width:300px; }
-.mobile .unity .walletconnect-modal__base { padding:10px; max-width:300px; }
-.mobile .unity .walletconnect-modal__mobile__toggle { margin-bottom:10px; }
-.mobile .unity .walletconnect-modal__header { position:relative; left:auto; top:auto; display:flex; -webkit-box-pack:center; justify-content:center; align-items:center;  }
-.mobile .unity .walletconnect-modal__header p { color:#222; display: contents; flex: auto; }
-.mobile .unity .walletconnect-modal__header .walletconnect-modal__headerLogo { margin:0 5px 0 0; }
-.mobile .unity .walletconnect-modal__header .walletconnect-modal__close__wrapper { position: fixed; top: 5px; right: 5px; }
-.mobile .unity .walletconnect-connect__buttons__wrapper__android { margin: 110px 0; }
-.mobile .unity #walletconnect-qrcode-text { font-size:14px; margin: 0 0 10px; }
-.mobile .unity .walletconnect-qrcode__image { width: 200px;  }
-.mobile .unity .walletconnect-modal__footer { margin:5px 0 0; }
+.uYscM.web3modal-modal-lightbox { z-index: 3000; }
+.mobile #walletconnect-wrapper { background: rgba(37, 41, 46, 0.95); }
+.mobile #walletconnect-qrcode-modal { padding: 0; background: none; position: relative; top: auto; width: auto; left: auto; height: auto; transition: none; will-change: auto; }
+.mobile .walletconnect-modal__base { will-change: auto; transform:none; }
+.mobile .walletconnect-search__input { width:calc(100% - 32px) !important; }
+
+/****/
+html.mobile.prod[sys='dungeondual'] { background:none; }
+html.mobile.prod[sys='dungeondual'] #demoApp.mobile > nav { visibility: hidden; }
+html.mobile.prod[sys='dungeondual'] #demoApp.mobile > div:nth-child(2),html.mobile.prod[sys='dungeondual'] #demoApp.mobile > div:nth-child(3) { visibility: hidden; }
+

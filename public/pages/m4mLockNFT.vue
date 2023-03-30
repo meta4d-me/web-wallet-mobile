@@ -16,7 +16,7 @@
       </van-button>
     </template>
   </div>
-  <load-steps ref="stepRef" @callBack="handle"></load-steps>
+  <load-steps ref="stepRef" @callBack="handle" />
 </template>
 
 <script>
@@ -55,11 +55,9 @@ export default {
       },
       steps: {
         select: 0,
-        list: [
-          { step: 1, label: 'get params ' },
+        list: [{ step: 1, label: 'get params ' },
           { step: 2, label: 'connect Wallet. ' },
-          { step: 3, label: 'Lock NFT ' },
-        ],
+          { step: 3, label: 'Lock NFT ' }],
         show: false,
         error: 0,
       },
@@ -70,7 +68,9 @@ export default {
   mounted(){
     this.$root.loading(false);
     this.$refs.stepRef.steps = this.steps;
-    //this.getParams();
+    if(process.env.prod === 'prod'){
+      this.getParams();
+    }
   },
   methods: {
     getParams(){
@@ -79,7 +79,7 @@ export default {
       query = this.$route.query;
       if(JSON.stringify(query) === '{}'){
         //let url = 'https://aradpay.gamewonderlab.io/#/lock?gameSign=&guid=401963858928879058&nonce=3435973836&params=%7b%0a%09%22m4m_token_id%22%20%3a%20%22399712059115176447%22%2c%0a%09%22nonce%22%20%3a%201%2c%0a%09%22component_ids%22%20%3a%20%5b%0a%09%09401963858928877696%0a%09%5d%0a%7d&tokenId=399712059115176447';
-        let url = 'https://aradpay.gamewonderlab.io/#/lock?gameSign=&guid=401963858928887106&nonce=3435973836&params=%7b%0a%09%22m4m_token_id%22%20%3a%20%22399712059115176545%22%2c%0a%09%22nonce%22%20%3a%202%2c%0a%09%22component_ids%22%20%3a%20%5b%0a%09%09%22401963858928886705%22%0a%09%5d%0a%7d&tokenId=399712059115176545';
+        let url = 'https://aradpay.gamewonderlab.io/#/lock?gameSign=&guid=401963858928889568&nonce=2&params=%7b%22nonce%22%3a%202%2c%20%22m4m_token_id%22%3a%20%22399712059115176546%22%2c%20%22component_ids%22%3a%20%5b%22401963858928887572%22%5d%7d&tokenId=399712059115176546';
         //url = 'https%3A%2F%2Faradpay.gamewonderlab.io%2F%23%2Flock%3FgameSign%3D%26guid%3D401963858928885716%26nonce%3D2%26params%3D%7B%22m4m_token_id%22%20%3A%20%22399712059115176449%22%2C%22nonce%22%20%3A%202%2C%22component_ids%22%20%3A%20%5B%22401963858928885716%22%5D%7D%26tokenId%3D401963858928885716'
         query = this.$$.getURLParam({}, url);
       }
@@ -108,6 +108,9 @@ export default {
           let msg = res.data || 'Connect Wallet Error !';
           showFailToast(msg);
           this.$$.loadStepsErr(this, 1,msg);
+          if(process.env.prod === 'prod'){
+            window.location.href = 'uniwebview://close?route=lockNFT&step=1&t='+new Date().valueOf()+'&error='+msg;
+          }
         }
       });
     },
@@ -130,7 +133,6 @@ export default {
         this.chainStore.provider,
         this.mint.targetContract,
         this.mint.m4mTokenId.toString(),
-        this.mint.gameId,
         inComponentIds,
         inAmounts,
       ).then(res => {
@@ -139,20 +141,30 @@ export default {
           showSuccessToast('lock NFT Success !');
           this.mint.txId = res.transactionHash;
           this.$refs.stepRef.steps.select = 3;
-          //this.handle();
+          if(process.env.prod === 'prod'){
+            this.handle();
+          }
         }else{
           showFailToast('lock NFT Failed !');
           this.$$.loadStepsErr(this, 2,'Failed !');
+          if(process.env.prod === 'prod'){
+            window.location.href = 'uniwebview://close?route=lockNFT&step=2&t='+new Date().valueOf()+'&error=general result lock NFT Failed !';
+          }
         }
       }).catch(res => {
         res = res.toLocaleString();
         this.$$.loadStepsErr(this, 2,'Failed !'+ res.substring(res.indexOf(':')+1, res.indexOf(';')));
         console.log('handleLockNFT catch error', res);
+        if(process.env.prod === 'prod'){
+          window.location.href = 'uniwebview://close?route=lockNFT&step=2&t='+new Date().valueOf()+'&error=handleLockNFT catch error, '+res;
+        }
       });
     },
     handle(){
-      let obj = { guid: this.mint.guid, txId: this.mint.txId, t: new Date().valueOf() }
-      window.location.href = 'uniwebview://lock'+this.$$.Obj2String(obj);
+      setTimeout(() => {
+        let obj = { guid: this.mint.guid, txId: this.mint.txId, t: new Date().valueOf() }
+        window.location.href = 'uniwebview://lock'+this.$$.Obj2String(obj);
+      }, 2000);
     },
   },
 };

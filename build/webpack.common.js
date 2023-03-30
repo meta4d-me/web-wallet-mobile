@@ -32,7 +32,7 @@ module.exports = () => {
         '@': path.resolve(__dirname, '../public'),
         '@utils': path.resolve(__dirname, '../public/utils'),
         '@web3': path.resolve(__dirname, '../public/web3'),
-        '@App': path.resolve(__dirname, '../demoApp'),
+        '@App': path.resolve(__dirname, '../dungeondual'),
         '@m4m': path.resolve(__dirname, '../m4m'),
       },
       aliasFields: ['browser', 'browser.esm'], /**别名区域**/
