@@ -16,7 +16,7 @@
 
 <script>
 export default {
-  name: 'getUniWebview',
+  name: 'GetUniWebview',
   data() {
     return {
       params: null,
@@ -29,6 +29,7 @@ export default {
     setTimeout(() => {
       this.handle();
     }, 500);
+    this.$root.loading(false);
   },
   methods: {
     getParams(){

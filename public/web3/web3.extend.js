@@ -16,10 +16,11 @@ export default {
     });
   },
   async init(type, userWalletAddress, callback){
+    this.resetApp();
     try {
       this.provider = await this.web3Modal().connect()
     } catch(connectError){
-      return callback && callback({ err: -1, data: connectError });
+      return callback && callback({ err: -1, data: 'User Close Modal !' });
     }
     this.web3 = new Web3(this.provider); //钱包实例
     //$$.ENV.env === 'mobile' && this.web3.currentProvider.isMetamask 移动端web3浏览器，小狐狸，imtoken等
@@ -134,8 +135,8 @@ export default {
       provider: this.provider,
       connected: true,
       userAddress: res.data,
-      chainId: await this.web3.eth.getChainId(),
-      networkId: await this.web3.eth.net.getId(),
+      chainId: this.provider.chainId,
+      networkId: this.provider.chainId,
     }
     /**连接钱包**/
     if(obj.type === 'connectWallet'){
@@ -154,7 +155,13 @@ export default {
   },
   async getSignature(token, userAddress){
     console.log('getSignature: ', token, userAddress);
-    return await this.web3.eth.personal.sign(token, userAddress);
+    try{
+      let res = await this.web3.eth.personal.sign(token, userAddress);
+      return { code: 0, message: res };
+    }catch (r){
+      return r;
+    }
+    //return await this.web3.eth.personal.sign(token, userAddress);
   },
   async subscribeProvider(fn){
     if(this.hasConnected){

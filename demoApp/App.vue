@@ -14,6 +14,13 @@ export default {
       event: false,
     };
   },
+  watch: {
+    $route(to, from){
+      //console.log(1)
+      //console.log(to, from);
+      this.loading(true);
+    },
+  },
   created(){
 
   },
@@ -34,5 +41,5 @@ export default {
 };
 </script>
 <style scoped>
-#demoApp { padding:50px; }
+#demoApp { padding:20px; }
 </style>

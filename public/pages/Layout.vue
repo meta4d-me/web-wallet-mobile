@@ -1,25 +1,23 @@
 <template>
   <nav>
+    <van-icon name="close" class="close Flex" @click="handleAction('close')" />
     <h2 class="black">
-      web3相关方法和demo
+      web3 demo
     </h2>
-    <ul class="LFlex">
-      <van-button plain type="primary" @click="handleAction('/getWalletAddress')">
-        获取钱包地址
-      </van-button>
-      <van-button plain type="primary" @click="handleAction('/mint')">
-        Mint流程
-      </van-button>
+    <ul>
+      <template v-for="(item,index) in ul" :key="index">
+        <van-button
+          v-if="item.show"
+          plain
+          type="primary"
+          size="small"
+          :id="item.path"
+          @click="handleAction('/'+item.path)"
+        >
+          {{ item.label }}
+        </van-button>
+      </template>
     </ul>
-    <h2 class="black">
-      unity webview相关方法和demo
-    </h2>
-    <ul class="LFlex">
-      <van-button plain type="primary" @click="handleAction('/getUniWebview')">
-        获取unity传入参数
-      </van-button>
-    </ul>
-
   </nav>
 
   <router-view v-slot="{ Component }">
@@ -30,13 +28,22 @@
   </router-view>
 </template>
 <script>
-import { Button } from 'vant';
+import { Button, Icon, Loading } from 'vant';
 export default {
   // eslint-disable-next-line vue/multi-word-component-names
   name: 'Layout',
-  components: { 'van-button': Button },
+  components: { 'van-button': Button, 'van-icon': Icon, 'van-loading': Loading },
   data() {
     return {
+      steps: { },
+      ul: [
+        { label: 'get Wallet Address', path: 'getWalletAddress', show: true },
+        { label: 'Mint Work Flow', path: 'mint', show: true },
+        { label: 'Lock NFT Work Flow', path: 'lock', show: true },
+        { label: 'Lock Role Work Flow', path: 'lockRole', show: true },
+        { label: 'Unlock Work Flow', path: 'unlock', show: true },
+        { label: 'query image', path: 'pic', show: false },
+      ],
     };
   },
   created(){
@@ -44,15 +51,21 @@ export default {
   },
   mounted(){
     this.$$.$('html').classList.add(this.$$.ENV.env);
+    this.$root.loading(false);
   },
   methods: {
     handleAction(url){
-      this.$router.push(url);
+      if(url === 'close'){
+        window.location.href = 'uniwebview://close?t='+new Date().valueOf();
+      }else{
+        this.$router.push(url);
+      }
     },
   },
 };
 </script>
 <style scoped>
-nav {  }
-nav ul button { margin:20px 20px 20px 0; }
+nav { padding:0 0 10px; border-bottom:2px solid #07c160; margin:0 0 15px }
+nav ul button { margin: 5px 10px 5px 0; }
+.close { position:absolute; right:5px; top:5px; font-size:40px; color:#f00; cursor: pointer; z-index: 1000; }
 </style>

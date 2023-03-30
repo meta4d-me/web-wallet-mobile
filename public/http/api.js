@@ -1,4 +1,4 @@
-import { getStaticJSON } from './ajax';
+import { getStaticJSON, postApi } from './ajax';
 import $$ from '@App/$$';
 
 /**获取环境的请求URL配置**/
@@ -24,6 +24,9 @@ const $API = {
   formPostDemo: params => {
     return formPost(`${host}/xxxxxx/xxxx`, params);
   },**/
+  postAPIDemo2: params => {
+    return postApi('/api/images'+$$.Obj2String(params))
+  },
 };
 
 export default $API;

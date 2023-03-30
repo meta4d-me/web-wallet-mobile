@@ -6,9 +6,10 @@ const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 const path = require('path');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
-const envConfig = require('../config/env.conf');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+//const ManifestPlugin = require('webpack-manifest-plugin');
+const envConfig = require('../config/env.conf');
 const BuildENV = envConfig.getBuildENV({ NODE_ENV: '"production"', prod: '"prod"' });
 
 module.exports = (RESETENV) => {
@@ -40,7 +41,7 @@ module.exports = (RESETENV) => {
         vConsole: false,
         prod: true,
         staticURL: BuildENV.staticURL,
-        webURL: BuildENV.webURL
+        webURL: BuildENV.webURL,
       }),
       new webpack.DefinePlugin({
         /**自定义当前系统变量**/
@@ -169,9 +170,9 @@ module.exports = (RESETENV) => {
     },
   };
 
-  if (RESETENV && RESETENV.analyzer) {
-    pro__base_config.plugins.push(new BundleAnalyzerPlugin()); //打包体积分析
-    pro__base_config.plugins.push(new ManifestPlugin());  //展示源代码和打包代码映射关系
+  if (BuildENV && BuildENV.analyzer) {
+    BuildConfig.plugins.push(new BundleAnalyzerPlugin()); //打包体积分析
+    //BuildConfig.plugins.push(new ManifestPlugin());  //展示源代码和打包代码映射关系
   }
 
   return merge(common(RESETENV), BuildConfig); //合并配置

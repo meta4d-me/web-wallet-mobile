@@ -20,7 +20,7 @@ export const isApprovalForAll =  async (provider, type, userAddr, nftContract, t
     let nft = new Contract(nftContract, type === "erc721" ? ERC721__factory.abi : ERC1155Upgradeable__factory.abi, provider.getSigner()) as M4mComponentV2;
     console.log('isApprovalForAll nft', nft)
     let tx = await nft.isApprovedForAll(userAddr, targetContract);
-    return tx;
+    return tx; // 返回boolean
 }
 
 /**provider: any,type: "erc721" | "erc1155", address: string, nftContract: string,targetContract: string**/
@@ -59,7 +59,7 @@ export const getGameSignerHash = async(params, m4mNFTId, gameId, nonce) => {
     console.log('paramsHashes', paramsHashes)
     let hash = ethers.utils.solidityKeccak256(['bytes'],
         [ethers.utils.solidityPack(['uint', 'uint', 'uint', `bytes32[${params.length}]`],
-            [m4mNFTId, gameId, Number(nonce), paramsHashes])]);
+            [m4mNFTId, gameId, nonce, paramsHashes])]);
     console.log('hash', hash);
     return hash;
 };
@@ -77,14 +77,14 @@ export const getLocalGameSignerSig = async(signHash, KEY) => {
 export const handleGameEnd = async (provider, targetContract, m4mTokenId, nonce, params, operatorSig, gameSignerSig) => {
     provider = provider && new ethers.providers.Web3Provider(provider) || await getProvider('Injected');
     const baggage = new Contract(targetContract, M4mBaggageWithoutRole__factory.abi,  provider.getSigner()) as M4mBaggageWithoutRole;
-    console.log('handleGameEnd', baggage);
-    console.log('入参', 'm4mTokenId='+m4mTokenId, 'nonce='+nonce, 'params='+params, 'operatorSig='+Buffer.from(''), 'gameSignerSig='+gameSignerSig);
-    console.log('params', params)
+    console.log('settleNewLoots baggage', baggage);
+    console.log('settleNewLoots 入参', 'm4mTokenId='+m4mTokenId, 'nonce='+nonce, 'params='+params, 'operatorSig='+Buffer.from(''), 'gameSignerSig='+gameSignerSig);
+    console.log('settleNewLoots params', params)
     let tx = await baggage.settleNewLoots(m4mTokenId, nonce, params, Buffer.from(''), gameSignerSig);
     return await tx.wait();
 };
 
-/**provider: any,targetContract: string,m4mTokenId: number,nonce: number,outComponentIds: number[],operatorSig: string,gameSignerSig: string**/
+/**provider: any, targetContract: string, m4mTokenId: number, nonce: number, outComponentIds: number[], operatorSig: string, gameSignerSig: string**/
 export const handleUnlockComponents = async(provider, targetContract, m4mTokenId, nonce, outComponentIds, operatorSig, gameSignerSig) => {
     provider = provider && new ethers.providers.Web3Provider(provider) || await getProvider('Injected');
     const baggage = new Contract(targetContract, M4mBaggageWithoutRole__factory.abi, provider.getSigner()) as M4mBaggageWithoutRole;
@@ -93,17 +93,27 @@ export const handleUnlockComponents = async(provider, targetContract, m4mTokenId
     return await tx.wait();
 }
 
-/**provider: any,targetContract: string,m4mTokenId: number, gameId: number, inComponentIds: number[],inAmounts: number[]**/
+/**provider: any, targetContract: string, m4mTokenId: number, gameId: number, inComponentIds: number[], inAmounts: number[]**/
 export const handleLockComponents = async(provider, targetContract, m4mTokenId, gameId, inComponentIds, inAmounts) => {
+    console.log('targetContract', targetContract);
+    console.log('m4mTokenId', m4mTokenId);
+    console.log('gameId', gameId);
+    console.log('inComponentIds', inComponentIds);
+    console.log('inAmounts', inAmounts);
+    //inComponentIds = [];
+    //inAmounts = [];
     provider = provider && new ethers.providers.Web3Provider(provider) || await getProvider('Injected');
     const baggage = new Contract(targetContract, M4mBaggageWithoutRole__factory.abi, provider.getSigner()) as M4mBaggageWithoutRole;
     console.log('handleLockComponents baggage', baggage);
     let info = await baggage.lockedEmptyNFTs(m4mTokenId);
     console.log('handleLockComponents info', info);
-    if(info.owner){
+    console.log('handleLockComponents info gameId',Number(info.gameId));
+    if(!!Number(info.gameId)){
         return {success:true};
     }else{
+        console.log('handleLockComponents tx step');
         let tx = await baggage.lockComponents(m4mTokenId, gameId, inComponentIds, inAmounts);
+        console.log('handleLockComponents tx', tx);
         return await tx.wait();
     }
 }
