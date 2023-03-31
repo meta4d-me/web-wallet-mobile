@@ -20,7 +20,7 @@
 </template>
 
 <script>
-import { handleUnlockComponents } from '@web3/mint';
+import { handleUnlockComponents, getUnlockGameSignerHash, getLocalGameSignerSig } from '@web3/mint';
 import $web3Ext from '@web3/web3.extend';
 import { showFailToast, showSuccessToast } from 'vant';
 import loadSteps from '@/components/loadSteps';
@@ -43,6 +43,10 @@ export default {
         targetContract: this.$$.apiURLS.targetContract,
         ERCType: this.$$.apiURLS.ERCType,
         txId: '',
+        'loot_ids': [],
+        'lost_ids': [],
+        'loot_amounts': [],
+        'lost_amounts': [],
       },
       chainStore: {
         chainId: null,
@@ -78,7 +82,7 @@ export default {
       let query = {};
       query = this.$route.query;
       if(JSON.stringify(query) === '{}'){
-        let url = 'https://aradpay.gamewonderlab.io/#/unlock?gameSign=&guid=401963858928879058&nonce=3435973836&params=%7b%0a%09%22m4m_token_id%22%20%3a%20%22399712059115176447%22%2c%0a%09%22nonce%22%20%3a%201%2c%0a%09%out_component_ids%22%20%3a%20%5b%0a%09%09401963858928877696%0a%09%5d%0a%7d&tokenId=399712059115176447';
+        let url = 'http://127.0.0.1:9010/#/unlock?gameSign=0x395e2ea834104e535c71d5b9ac2c780f0bd0471292054945c1db65b840ad6a2e0dff4bbe91496d27337bdf861e32f2f701503b61f6c76cc6678be24e628100701c&guid=401963858928891262&nonce=1&params={"nonce": 1, "gameId": 1, "loot_ids": ["401963858928886705"], "lost_ids": ["401963858928886705"], "loot_amounts": [1], "lost_amounts": [1], "m4m_token_id": "399712059115176656"}&tokenId=399712059115176656';
         query = this.$$.getURLParam({}, url);
       }
       /**gameSign, guid, nonce, params, tokenId**/
@@ -86,12 +90,57 @@ export default {
       this.mint.m4mTokenId = query.tokenId || query.m4mTokenId;
       this.mint.params = query.params && JSON.parse(query.params) || '';
       this.mint.nonce = this.mint.params && Number(this.mint.params.nonce) || '';
-      this.mint.params = this.mint.params && this.mint.params['out_component_ids'] || '';
+      this.mint['loot_ids'] = this.mint.params && this.mint.params['loot_ids'] || '';
+      this.mint['loot_amounts'] = this.mint.params && this.mint.params['loot_amounts'] || '';
+      this.mint['lost_ids'] = this.mint.params && this.mint.params['lost_ids'] || '';
+      this.mint['lost_amounts'] = this.mint.params && this.mint.params['lost_amounts'] || '';
       this.mint.gameSignerSig = query.gameSign;
       this.mint.operatorSig = Buffer.from('');
       this.mint.guid = query.guid;
       console.log(this.mint);
-      this.getWalletAddress();
+      debugger
+      if(process.env.prod === 'prod'){
+        this.getWalletAddress();
+      }else{
+        this.handleGetGameSignerHash();
+      }
+    },
+    handleGetGameSignerHash(){
+      getUnlockGameSignerHash(
+        this.mint.m4mTokenId.toString(),
+        this.mint.gameId,
+        this.mint.nonce,
+        this.mint['loot_ids'], // lootIds
+        this.mint['loot_amounts'], // lootAmounts
+        this.mint['lost_ids'], // lostIds
+        this.mint['lost_amounts'], // lostAmounts
+      ).then(res => {
+        this.handleGetLocalGameSignerSig(res);
+      }).catch(() => {
+        if(process.env.prod === 'prod'){
+          window.location.href = 'uniwebview://close?t='+new Date().valueOf();
+        }
+      });
+    },
+    handleGetLocalGameSignerSig(hash){
+      getLocalGameSignerSig(
+        hash,
+        '9c242f13f94872bda353270957f72bb7a1e4c71e3e9b5d174ad0684ffe6b62f0',
+      ).then(res => {
+        console.log('handleGetLocalGameSignerSig', res);
+        if(res !== this.mint.gameSignerSig){
+          this.mint.gameSignerSig = res;
+          showFailToast('Signature May Be Incorrect !');
+        }else{
+          console.log('handleGetLocalGameSignerSig', 'same as the game Signature');
+          showSuccessToast('Signature Verification Passed !');
+        }
+        this.getWalletAddress();
+      }).catch(() => {
+        if(process.env.prod === 'prod'){
+          window.location.href = 'uniwebview://close?t='+new Date().valueOf();
+        }
+      });
     },
     getWalletAddress(){
       console.log('getWalletAddress start');
@@ -130,10 +179,10 @@ export default {
         this.mint.targetContract,
         this.mint.m4mTokenId.toString(),
         this.mint.nonce,
-        componentIds, // lootIds
-        amountIds, // lootAmounts
-        componentIds, // lostIds
-        amountIds, // lostAmounts
+        this.mint['loot_ids'], // lootIds
+        this.mint['loot_amounts'], // lootAmounts
+        this.mint['lost_ids'], // lostIds
+        this.mint['lost_amounts'], // lostAmounts
         this.mint.operatorSig,
         this.mint.gameSignerSig,
       ).then(res => {
@@ -153,8 +202,15 @@ export default {
           }
         }
       }).catch(res => {
-        res = res.toLocaleString();
-        this.$$.loadStepsErr(this, 2,'Failed ! '+ res.substring(res.indexOf(':')+1, res.indexOf('(')));
+        let msg = 'Failed ! ';
+        if(res.error && res.error.code && res.error.data && res.error.message){
+          msg += 'error:{ code:'+ res.error.code+', msg:'+ res.error.message+' '+res.error.data.message+'}'
+        }else{
+          res = res.toLocaleString();
+          msg += res.substring(res.indexOf(':')+1, res.indexOf('('));
+        }
+        debugger
+        this.$$.loadStepsErr(this, 2,msg);
         console.log('handleUnlockNFT catch error', res);
         if(process.env.prod === 'prod'){
           window.location.href = 'uniwebview://close?route=UnlockNFT&step=2&t='+new Date().valueOf()+'&error=handleUnlockNFT catch error, '+res;
