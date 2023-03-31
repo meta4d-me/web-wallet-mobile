@@ -16,7 +16,6 @@ const getHeader = (obj) => {
 };
 
 const resNext= (R, resolve, obj) => {
-  //debugger
   if(R.status === 200){
     location.reload();
   }else{

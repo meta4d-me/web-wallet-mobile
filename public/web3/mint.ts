@@ -46,7 +46,7 @@ export const getOperatorSig = async (owner, m4mNFTId, gameId, uuid, lootIds, loo
             [owner, m4mNFTId, gameId, uuid, lootIds, lootAmounts, lostIds, lostAmounts])]);
 };
 
-/**自定义游戏签名https://github.com/meta4d-me/meta4d-nft/blob/master/test/TestBaggage.js#L91
+/**mint自定义游戏签名https://github.com/meta4d-me/meta4d-nft/blob/master/test/TestBaggage.js#L91
  * params:{tokenId: number;prepare: boolean;name: string;symbol: string;amount: number;}[], m4mNFTId:string, gameId:number, nonce:number | string
 **/
 export const getGameSignerHash = async(params, m4mNFTId, gameId, nonce) => {
@@ -64,15 +64,35 @@ export const getGameSignerHash = async(params, m4mNFTId, gameId, nonce) => {
     return hash;
 };
 
+/**unlock component自定义游戏签名https://github.com/meta4d-me/meta4d-nft/blob/master/test/TestBaggage.js#L91
+ *  provider:any, targetContract:string, m4m_token_id:string, nonce:number | string, gameId:number, out_component_ids
+ **/
+export const getUnlockGameSignerHash = async(m4m_token_id, gameId, nonce, loot_ids, loot_amounts, lost_ids, lost_amounts) => {
+    console.log('m4m_token_id', m4m_token_id);
+    console.log('nonce', nonce);
+    console.log('gameId', gameId);
+    console.log('loot_ids', loot_ids);
+    console.log('loot_amounts', loot_amounts);
+    debugger
+    const lootLength = loot_ids.length;
+    const lostLength = lost_ids.length;
+    const hash = ethers.utils.solidityKeccak256([ 'bytes' ],
+        [ ethers.utils.solidityPack([ 'uint', 'uint', 'uint', `uint[${lootLength}]`,
+                `uint[${lootLength}]`, `uint[${lostLength}]`, `uint[${lostLength}]` ],
+            [ m4m_token_id, gameId, nonce, loot_ids, loot_amounts, lost_ids, lost_amounts ]) ]);
+    console.log('hash', hash);
+    return hash;
+};
+
 /**自定义游戏签名https://github.com/meta4d-me/meta4d-nft/blob/master/test/TestBaggage.js#L91
  * signHash:string, KEY:string
  * **/
 export const getLocalGameSignerSig = async(signHash, KEY) => {
-    let gameSigningKey = new ethers.utils.SigningKey('0x' + KEY)
+    let gameSigningKey = new ethers.utils.SigningKey('0x' + KEY);
     return ethers.utils.joinSignature(await gameSigningKey.signDigest(signHash));
 };
 
-/**provider: any,targetContract: string,m4mTokenId: number,nonce: number,params: {tokenId: number;prepare: boolean;name: string;symbol: string; amount: number;}[],
+/**provider: any,targetContract: string, m4mTokenId: number,nonce: number,params: {tokenId: number;prepare: boolean;name: string;symbol: string; amount: number;}[],
  operatorSig: string,gameSignerSig: string,overrides?: any**/
 export const handleSettleNewLoots = async (provider, targetContract, m4mTokenId, nonce, params, operatorSig, gameSignerSig) => {
     provider = provider && new ethers.providers.Web3Provider(provider) || await getProvider('Injected');
@@ -88,6 +108,17 @@ export const handleSettleNewLoots = async (provider, targetContract, m4mTokenId,
 /**provider: any, targetContract: string, m4mTokenId: BigNumberish, nonce: BigNumberish, lootIds: BigNumberish[], lootAmounts: BigNumberish[], lostIds: BigNumberish[], lostAmounts: BigNumberish[], operatorSig: BytesLike,gameSignerSig: BytesLike,overrides?: CallOverrides**/
 export const handleUnlockComponents = async(provider, targetContract, m4mTokenId, nonce, lootIds, lootAmounts, lostIds, lostAmounts, operatorSig, gameSignerSig) => {
     provider = provider && new ethers.providers.Web3Provider(provider) || await getProvider('Injected');
+    console.log('m4mTokenId', m4mTokenId);
+    console.log('nonce', nonce);
+    console.log('lootIds', lootIds);
+    console.log('lootAmounts', lootAmounts);
+    console.log('lostIds', lostIds);
+    console.log('lostAmounts', lostAmounts);
+    console.log('operatorSig', operatorSig);
+    console.log('gameSignerSig', gameSignerSig);
+    console.log('targetContract', targetContract);
+    console.log('provider', provider);
+    debugger
     const baggage = new Contract(targetContract, M4mBaggageWithoutRole__factory.abi, provider.getSigner()) as M4mBaggageWithoutRole;
     console.log('handleUnlockComponents baggage', baggage);
     let tx = await baggage.settleLoots(m4mTokenId, nonce, lootIds, lootAmounts, lostIds, lostAmounts, operatorSig, gameSignerSig);

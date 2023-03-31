@@ -96,8 +96,11 @@ export default {
       this.mint.operatorSig = Buffer.from('');
       this.mint.guid = query.guid;
       console.log('this.mint', this.mint);
-      //this.handleGetGameSignerHash();
-      this.getWalletAddress();
+      if(process.env.prod === 'prod'){
+        this.getWalletAddress();
+      }else{
+        this.handleGetGameSignerHash();
+      }
     },
     handleGetGameSignerHash(){
       getGameSignerHash(
@@ -123,7 +126,7 @@ export default {
         }else{
           showSuccessToast('Signature Verification Passed !');
         }
-        //this.getWalletAddress();
+        this.getWalletAddress();
       }).catch(() => {
         if(process.env.prod === 'prod'){
           window.location.href = 'uniwebview://close?t='+new Date().valueOf();
